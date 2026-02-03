@@ -180,9 +180,12 @@ function enviarViaWhatsApp(lat, lon, accuracy, motivo) {
     "PEDIDO DE AJUDA",
     "",
     `Tipo: ${tipoEmergencia}`,
+    "",
     `Status: ${statusLocalizacao}`,
-    `Localização: ${link}`,
-    `Precisão: ${prec}`
+    "",
+    `Precisão: ${prec}`,
+    "",
+    `Localização: ${link}`
   ].join("\n");
 
   const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
