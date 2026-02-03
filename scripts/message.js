@@ -239,10 +239,20 @@ function pararLocalizacao(){
     esconderLightbox();
 }
 
+/* ===== (NOVO) Root correto para GitHub Pages (project pages) =====
+   Se a app estiver em https://usuario.github.io/RepoName/, o origin é só https://usuario.github.io
+   então precisamos incluir "/RepoName" ao gerar links absolutos.
+   A lógica abaixo captura tudo antes de "/pages/".
+*/
+function obterRootDoSite() {
+  const { origin, pathname } = window.location;
+  const antesDePages = pathname.split("/pages/")[0]; // ex.: "/UniFacensSOS" ou ""
+  return origin + antesDePages;
+}
+
 function gerarLinkMapa(lat, lon) {
-    const base = window.location.origin; // ex.: https://seu-dominio.com
-    const pathMapa = "/pages/map.html";  // ajuste conforme seu projeto
-    const url = new URL(pathMapa, base);
+    const root = obterRootDoSite();           // ex.: https://.../UniFacensSOS  ou https://...
+    const url = new URL(root + "/pages/map.html");
     url.searchParams.set("lat", lat);
     url.searchParams.set("lon", lon);
     return url.toString();
