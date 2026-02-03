@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const page = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   const routes = {
-    'index.html': () => import('./main.js'),
+    'index.html': () => import('./home.js'),
     'message.html': () => import('./message.js'),
     'map.html': () => import('./map.js'),
     
