@@ -1,5 +1,4 @@
 const NUMERO_DESTINO = "5515981144802";
-const SITE_MAPA = "";
 
 let watchID = null;
 let tipoEmergencia = "EMERGÊNCIA";
@@ -137,9 +136,20 @@ function pararLocalizacao(){
     esconderLightbox();
 }
 
+function gerarLinkMapa(lat, lon) {
+    const base = window.location.origin; // ex.: https://seu-dominio.com
+    const pathMapa = "/pages/map.html";  // ajuste conforme seu projeto
+    const url = new URL(pathMapa, base);
+    url.searchParams.set("lat", lat);
+    url.searchParams.set("lon", lon);
+    return url.toString();
+}
+
 // ======================
 //   ENVIO DE MENSAGEM
 // ======================
+
+
 
 function enviarMensagem(lat,lon,accuracy){
     // ===== CAMINHO WHATSAPP =====
@@ -150,71 +160,74 @@ function enviarMensagem(lat,lon,accuracy){
     // enviarViaSMS(lat,lon,accuracy);
 }
 
-function enviarViaWhatsApp(lat,lon,accuracy){
-let link = "Não disponível";
-let prec = "Não disponível";
+function enviarViaWhatsApp(lat, lon, accuracy) {
+    let link = "Não disponível";
+    let prec = "Não disponível";
 
-if(lat !== null && lon !== null){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
-}
-if(accuracy){
-    prec = Math.round(accuracy) + " metros";
-}
+    if (lat !== null && lon !== null) {
+        link = gerarLinkMapa(lat, lon);
+    }
 
-const msg =
-`PEDIDO DE AJUDA
+    if (accuracy) {
+        prec = Math.round(accuracy) + " metros";
+    }
 
-Tipo: ${tipoEmergencia}
+    const msg =
+        `PEDIDO DE AJUDA
 
-Localização: ${link}
+        Tipo: ${tipoEmergencia}
 
-Precisão: ${prec}`;
+        Localização: ${link}
 
-const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
-window.open(url,"_blank");
-}
+        Precisão: ${prec}`;
 
-function enviarViaSMS(lat,lon,accuracy){
-let link = "Não disponível";
-let prec = "Não disponível";
-
-if(lat && lon){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
+    const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
 }
 
-if(accuracy){
-    prec = Math.round(accuracy) + " metros";
-}
 
-const msg =
-`PEDIDO DE AJUDA
-Tipo: ${tipoEmergencia}
-Localização: ${link}
-Precisão: ${prec}`;
+function enviarViaSMS(lat, lon, accuracy) {
+    let link = "Não disponível";
+    let prec = "Não disponível";
 
-const apiKey = document.getElementById("apiKeyInput").value;
+    if (lat !== null && lon !== null) {
+        link = gerarLinkMapa(lat, lon);
+    }
 
-if(!apiKey){
-    alert("Informe a API KEY do SMS.");
-    return;
-}
+    if (accuracy) {
+        prec = Math.round(accuracy) + " metros";
+    }
 
-const url = `https://api.smsmobileapi.com/sendsms/?apikey=${apiKey}&recipients=${NUMERO_DESTINO}&message=${encodeURIComponent(msg)}`;
+    const msg =
+    `PEDIDO DE AJUDA
+    Tipo: ${tipoEmergencia}
+    Localização: ${link}
+    Precisão: ${prec}`;
 
-fetch(url)
-    .then(r => r.text())
-    .then(res => {
-    console.log("Resposta SMS:",res);
-    alert("SMS enviado!");
-    })
-    .catch(err => {
-    console.error("Erro SMS:",err);
-    alert("Erro ao enviar SMS");
-    });
+
+    const apiKey = document.getElementById("apiKeyInput").value;
+
+    if(!apiKey){
+        alert("Informe a API KEY do SMS.");
+        return;
+    }
+
+    const url = `https://api.smsmobileapi.com/sendsms/?apikey=${apiKey}&recipients=${NUMERO_DESTINO}&message=${encodeURIComponent(msg)}`;
+
+    fetch(url)
+        .then(r => r.text())
+        .then(res => {
+        console.log("Resposta SMS:",res);
+        alert("SMS enviado!");
+        })
+        .catch(err => {
+        console.error("Erro SMS:",err);
+        alert("Erro ao enviar SMS");
+        });
 }
 
 export function init() {
-  window.definirTipo = definirTipo;
-  window.iniciarLocalizacao = iniciarLocalizacao;
-  window.enviarSemPrecisao = enviarSemPrecisao;
+    window.definirTipo = definirTipo;
+    window.iniciarLocalizacao = iniciarLocalizacao;
+    window.enviarSemPrecisao = enviarSemPrecisao;
 }
