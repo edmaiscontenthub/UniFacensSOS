@@ -7,11 +7,23 @@ let ultimoLon = null;
 let ultimaPrecisao = null;
 let timerBotao = null;
 let timerSemGps = null;
-
 let metaPrecisao = 15;          // meta inicial
 let botaoLiberado = false;      // quando true, botão fica visível e não some mais
 let escalonadorID = null;       // setInterval do escalonamento
-let inicioTentativa = null;     // timestamp do início
+let timeoutInicialID = null;    // timestamp do início
+let enviouMensagem = false;
+
+// ===== Helpers de feedback do Lightbox (NOVO) =====
+function textoPrecisao(accuracy) {
+  return (accuracy != null) ? `${Math.round(accuracy)}m` : "—";
+}
+
+function atualizarLightbox({ titulo, linha1 = "", linha2 = "", rodape = "" }) {
+  const linhas = [linha1, linha2].filter(Boolean).join("<br>");
+  const extra = rodape ? `<br><br><small style="opacity:.85">${rodape}</small>` : "";
+  document.querySelector("#lightbox p").innerHTML =
+    `<b>${titulo}</b>${linhas ? "<br>" + linhas : ""}${extra}`;
+}
 
 function definirTipo(tipo){
 tipoEmergencia = tipo;
@@ -46,12 +58,34 @@ function iniciarLocalizacao(){
     // reset da lógica
     metaPrecisao = 15;
     botaoLiberado = false;
-    inicioTentativa = Date.now();
 
-    mostrarLightbox("<b>Localizando</b><br>Tentando precisão de 15m…");
+    enviouMensagem = false;
+
+    // ===== Feedback inicial (AJUSTADO) =====
+    mostrarLightbox("<b>Buscando localização…</b><br>Ative o GPS e mantenha-se em local aberto, se possível.");
+    atualizarLightbox({
+      titulo: "Buscando localização…",
+      linha1: `Meta inicial: ${metaPrecisao}m`,
+      rodape: "Isso pode levar alguns segundos."
+    });
 
     // inicia escalonamento (libera botão após 3s e relaxa meta depois)
     iniciarEscalonamentoMeta();
+
+    const TEMPO_MAX_MS = 20000;
+
+    setTimeout(() => {
+        if (enviouMensagem) return;
+
+        pararLocalizacao();
+
+        if (coordenadasValidas(ultimoLat, ultimoLon)) {
+            enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao, "Tempo máximo atingido.");
+        } else {
+            enviarMensagem(null, null, null, "Tempo máximo atingido e sem coordenadas.");
+        }
+    }, TEMPO_MAX_MS);
+
 
     watchID = navigator.geolocation.watchPosition(
         pos => {
@@ -59,21 +93,67 @@ function iniciarLocalizacao(){
         ultimoLon = pos.coords.longitude;
         ultimaPrecisao = pos.coords.accuracy;
 
-        // feedback simples (sem mexer no botão)
-        const precTxt = ultimaPrecisao ? Math.round(ultimaPrecisao) + "m" : "—";
-        document.querySelector("#lightbox p").innerHTML =
-            `<b>Localizando</b><br>Precisão atual: ${precTxt}<br>Meta: ${metaPrecisao}m`;
+
+
+        // TEMPORÁRIO
+        console.log("[GPS]", {
+            lat: ultimoLat,
+            lon: ultimoLon,
+            acc: ultimaPrecisao,
+            meta: metaPrecisao
+        });
+
+
+
+
+        // ===== Feedback durante a localização (AJUSTADO) =====
+        const temCoords = coordenadasValidas(ultimoLat, ultimoLon);
+
+        if (!temCoords) {
+          atualizarLightbox({
+            titulo: "Buscando localização…",
+            linha1: "Obtendo coordenadas do dispositivo.",
+            linha2: `Meta: ${metaPrecisao}m`,
+            rodape: "Se estiver em ambiente fechado, a precisão pode ser limitada."
+          });
+        } else {
+          atualizarLightbox({
+            titulo: "Aprimorando precisão…",
+            linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
+            linha2: `Meta: ${metaPrecisao}m`,
+            rodape: botaoLiberado ? "Você já pode enviar sem meta de precisão." : "Aguardando uma leitura mais precisa."
+          });
+        }
 
         // se atingiu a meta atual, envia automaticamente
         if(ultimaPrecisao !== null && ultimaPrecisao <= metaPrecisao){
+            // ===== Feedback no envio automático (AJUSTADO) =====
+            atualizarLightbox({
+              titulo: "Meta atingida ✅",
+              linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
+              linha2: "Enviando alerta…"
+            });
+
             pararLocalizacao();
             enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
         }
         },
         err => {
-        pararLocalizacao();
-        enviarMensagem(null,null,null);
-        },
+            pararLocalizacao();
+
+            // feedback local
+            const motivo =
+                err?.code === 1 ? "Permissão de localização negada." :
+                err?.code === 2 ? "Não foi possível obter o GPS (sinal fraco/indisponível)." :
+                err?.code === 3 ? "Tempo esgotado ao tentar obter a localização." :
+                "Falha ao obter a localização.";
+
+            // ===== Feedback de erro (AJUSTADO) =====
+            mostrarLightbox(`<b>Localização indisponível</b><br>${motivo}<br><br>Enviando alerta sem coordenadas…`);
+
+            // envia sem coordenadas, mas com contexto
+            enviarMensagem(null, null, null, motivo);
+            },
         {
         enableHighAccuracy:true,
         maximumAge:0,
@@ -82,29 +162,40 @@ function iniciarLocalizacao(){
     );
 }
 
-function iniciarEscalonamentoMeta(){
-    // limpa por segurança
-    if(escalonadorID) clearInterval(escalonadorID);
+function iniciarEscalonamentoMeta() {
+  // limpa por segurança
+  if (timeoutInicialID) clearTimeout(timeoutInicialID);
+  if (escalonadorID) clearInterval(escalonadorID);
 
+  // 1) janela inicial de 5s tentando 15m
+  timeoutInicialID = setTimeout(() => {
+    liberarBotaoSemPrecisao();
+
+    // 2) após 5s, relaxa a meta 10m a cada 2s
     escalonadorID = setInterval(() => {
-        const agora = Date.now();
-        const passou3s = (agora - inicioTentativa) >= 3000;
+      metaPrecisao += 10;
 
-        if(!passou3s) return;
+      // ===== Feedback no relaxamento (AJUSTADO) =====
+      atualizarLightbox({
+        titulo: "Aprimorando precisão…",
+        linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
+        linha2: `Meta ajustada: ${metaPrecisao}m`,
+        rodape: "Se a meta não for atingida, você ainda pode enviar manualmente."
+      });
+      
+      // se já tem coords e a meta ficou suficiente, dispara envio
+      if (coordenadasValidas(ultimoLat, ultimoLon) && ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
+        atualizarLightbox({
+          titulo: "Meta atingida ✅",
+          linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
+          linha2: "Enviando alerta…"
+        });
 
-        // após 3s: libera o botão (uma única vez)
-        liberarBotaoSemPrecisao();
-
-        // depois que liberou, aumenta a meta de 5 em 5 a cada 3s
-        metaPrecisao += 5;
-
-        // opcional: atualizar texto para dar feedback
-        document.querySelector("#lightbox p").innerHTML =
-        `<b>Localizando</b><br>
-        Precisão atual: ${ultimaPrecisao ? Math.round(ultimaPrecisao) + "m" : "—"}<br>
-        Meta: ${metaPrecisao}m (relaxando)`;
-
-    }, 3000);
+        pararLocalizacao();
+        enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
+      }
+    }, 2000);
+  }, 5000);
 }
 
 
@@ -112,6 +203,14 @@ function liberarBotaoSemPrecisao(){
     if(botaoLiberado) return; // trava: não deixa voltar
     botaoLiberado = true;
     document.getElementById("btnForcar").style.display = "block";
+
+    // ===== Feedback ao liberar botão (AJUSTADO) =====
+    atualizarLightbox({
+      titulo: "Aprimorando precisão…",
+      linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
+      linha2: `Meta: ${metaPrecisao}m`,
+      rodape: "Você já pode enviar sem meta de precisão."
+    });
 }
 
 function enviarSemPrecisao(){
@@ -133,6 +232,10 @@ function pararLocalizacao(){
         clearInterval(escalonadorID);
         escalonadorID = null;
     }
+    if (timeoutInicialID) {
+        clearTimeout(timeoutInicialID);
+        timeoutInicialID = null;
+    }
     esconderLightbox();
 }
 
@@ -151,38 +254,68 @@ function gerarLinkMapa(lat, lon) {
 
 
 
-function enviarMensagem(lat,lon,accuracy){
-    // ===== CAMINHO WHATSAPP =====
-    enviarViaWhatsApp(lat,lon,accuracy);
+function enviarMensagem(lat, lon, accuracy, motivo = null){
+    if (enviouMensagem) return;
+    enviouMensagem = true;
+    enviarViaWhatsApp(lat, lon, accuracy, motivo);
 
     // ===== CAMINHO SMS =====
     // Para ativar SMS, comente a linha acima 👆 e descomente a de baixo 👇
     // enviarViaSMS(lat,lon,accuracy);
 }
 
-function enviarViaWhatsApp(lat, lon, accuracy) {
-    let link = "Não disponível";
+function coordenadasValidas(lat, lon) {
+  const latNum = Number(lat);
+  const lonNum = Number(lon);
+
+  if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return false;
+
+  // Intervalos reais
+  if (latNum < -90 || latNum > 90) return false;
+  if (lonNum < -180 || lonNum > 180) return false;
+
+  // Bloqueia coordenadas zeradas
+  if (latNum === 0 && lonNum === 0) return false;
+
+  return true;
+}
+
+function obterTextoLinkMapa(lat, lon) {
+  if (coordenadasValidas(lat, lon)) {
+    return gerarLinkMapa(Number(lat), Number(lon));
+  }
+  return "Não disponível";
+}
+
+function enviarViaWhatsApp(lat, lon, accuracy, motivo) {
+    const link = obterTextoLinkMapa(lat, lon);
+
     let prec = "Não disponível";
+    if (accuracy) prec = Math.round(accuracy) + " metros";
 
-    if (lat !== null && lon !== null) {
-        link = gerarLinkMapa(lat, lon);
-    }
-
-    if (accuracy) {
-        prec = Math.round(accuracy) + " metros";
-    }
+    const statusLocalizacao = (link !== "Não disponível")
+        ? "Localização obtida."
+        : (motivo ? `Localização indisponível: ${motivo}` : "Localização indisponível.");
 
     const msg =
-        `PEDIDO DE AJUDA
+    `PEDIDO DE AJUDA
 
-        Tipo: ${tipoEmergencia}
+    Tipo: ${tipoEmergencia}
 
-        Localização: ${link}
+    Status: ${statusLocalizacao}
 
-        Precisão: ${prec}`;
+    Localização: ${link}
+
+    Precisão: ${prec}`;
 
     const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+
+    const popup = window.open(url, "_blank");
+
+    // Se o navegador bloquear o pop-up, abre na mesma aba
+    if (!popup) {
+    window.location.href = url;
+    }
 }
 
 

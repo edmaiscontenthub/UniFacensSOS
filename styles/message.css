@@ -96,9 +96,9 @@ body {
                 margin: 15px auto;
             }
 
-            & #lightbox .lightbox-content button{
+            & button{
                 margin-top: 15px;
-                margin-block: auto;
+                margin-inline: auto;
                 padding: 10px 15px;
                 border: none;
                 border-radius: 8px;
