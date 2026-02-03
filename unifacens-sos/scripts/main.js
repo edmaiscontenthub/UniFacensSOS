@@ -1,4 +1,19 @@
+// Página inicial (index.html)
+// Atualmente é uma página de navegação, sem lógica.
+
+export function init() {
+  // Se no futuro você quiser analytics simples, rastrear cliques etc., faça aqui.
+}
+
+/*
+ * Nota:
+ * Este arquivo manteve o código antigo por histórico, mas não é mais necessário
+ * para o index. Se você quiser, pode apagar todo o restante e manter apenas o init.
+ */
+
 const NUMERO_DESTINO = "5515981144802";
+
+const SITE_MAPA = "https://www.google.com/maps";
 
 let watchID = null;
 let tipoEmergencia = "EMERGÊNCIA";
@@ -154,7 +169,7 @@ let link = "Não disponível";
 let prec = "Não disponível";
 
 if(lat !== null && lon !== null){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
+    link = `${SITE_MAPA}?q=${lat},${lon}`;
 }
 if(accuracy){
     prec = Math.round(accuracy) + " metros";
@@ -177,8 +192,8 @@ function enviarViaSMS(lat,lon,accuracy){
 let link = "Não disponível";
 let prec = "Não disponível";
 
-if(lat && lon){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
+if(lat !== null && lon !== null){
+    link = `${SITE_MAPA}?q=${lat},${lon}`;
 }
 
 if(accuracy){

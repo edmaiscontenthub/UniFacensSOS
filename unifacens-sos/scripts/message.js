@@ -1,4 +1,13 @@
+// ======================
+//  CONFIGURAÇÕES BÁSICAS
+// ======================
+
+// Número de destino no formato internacional (DDI + DDD + número).
 const NUMERO_DESTINO = "5515981144802";
+
+// Link base para abrir o ponto no mapa.
+// (mantém o app 100% estático, sem depender de página própria)
+const SITE_MAPA = "https://www.google.com/maps";
 
 let watchID = null;
 let tipoEmergencia = "EMERGÊNCIA";
@@ -154,7 +163,7 @@ let link = "Não disponível";
 let prec = "Não disponível";
 
 if(lat !== null && lon !== null){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
+    link = `${SITE_MAPA}?q=${lat},${lon}`;
 }
 if(accuracy){
     prec = Math.round(accuracy) + " metros";
@@ -177,8 +186,8 @@ function enviarViaSMS(lat,lon,accuracy){
 let link = "Não disponível";
 let prec = "Não disponível";
 
-if(lat && lon){
-    link = `${SITE_MAPA}?lat=${lat}&lon=${lon}`;
+if(lat !== null && lon !== null){
+    link = `${SITE_MAPA}?q=${lat},${lon}`;
 }
 
 if(accuracy){
@@ -210,4 +219,28 @@ fetch(url)
     console.error("Erro SMS:",err);
     alert("Erro ao enviar SMS");
     });
+}
+
+// ======================
+//  API PÚBLICA DO MÓDULO
+// ======================
+
+/**
+ * Torna as funções acessíveis aos handlers inline do HTML (onclick="...").
+ * Se você futuramente remover os onclick do HTML, dá para trocar por addEventListener aqui.
+ */
+export function init() {
+  // Expondo no escopo global para compatibilidade com os onclick atuais.
+  window.definirTipo = definirTipo;
+  window.iniciarLocalizacao = iniciarLocalizacao;
+  window.enviarSemPrecisao = enviarSemPrecisao;
+
+  // Segurança: se estiver numa página sem lightbox, não faz nada.
+  const lightbox = document.getElementById('lightbox');
+  if (!lightbox) return;
+
+  // Opcional: ao clicar fora do conteúdo, fecha.
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) pararLocalizacao();
+  });
 }

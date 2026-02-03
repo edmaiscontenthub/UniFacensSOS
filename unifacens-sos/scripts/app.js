@@ -1,3 +1,8 @@
+/**
+ * Router simples por página.
+ * Importante: este arquivo é carregado como type="module" no HTML.
+ */
+
 document.addEventListener('DOMContentLoaded', async () => {
   const page = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 

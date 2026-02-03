@@ -1,4 +1,5 @@
 const NUMERO_DESTINO = "5515981144802";
+const SITE_MAPA = "";
 
 let watchID = null;
 let tipoEmergencia = "EMERGÊNCIA";
@@ -210,4 +211,10 @@ fetch(url)
     console.error("Erro SMS:",err);
     alert("Erro ao enviar SMS");
     });
+}
+
+export function init() {
+  window.definirTipo = definirTipo;
+  window.iniciarLocalizacao = iniciarLocalizacao;
+  window.enviarSemPrecisao = enviarSemPrecisao;
 }

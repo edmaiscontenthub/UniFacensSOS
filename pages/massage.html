@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniFacens SOS – Sistema Emergencial do Campus</title>
+    <link rel="stylesheet" href="../styles/app.css">
+</head>
+<body data-page="message">
+    <div class="container" id="message">
+        <div class="back">🔙</div>
+        <div class="logo">🚨</div>
+        <h1>UniFacens SOS</h1>
+        <p>Selecione o tipo de ocorrência.</p>
+
+        <a class="btn" href="#" onclick="definirTipo('SOCORRO'); iniciarLocalizacao();return false;">
+            <span class="emoji">✚</span><span>SOCORRO</span><span class="emoji">✚</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('FOGO'); iniciarLocalizacao();return false;">
+            <span class="emoji">🔥</span><span>FOGO</span><span class="emoji">🔥</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('VIOLÊNCIA'); iniciarLocalizacao();return false;">
+            <span class="emoji">🚨</span><span>VIOLÊNCIA</span><span class="emoji">🚨</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('AMEAÇA'); iniciarLocalizacao();return false;">
+            <span class="emoji">⚠️</span><span>AMEAÇA</span><span class="emoji">⚠️</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('VAZAMENTO'); iniciarLocalizacao();return false;">
+            <span class="emoji">☣</span><span>VAZAMENTO</span><span class="emoji">☣</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('RISCO'); iniciarLocalizacao();return false;">
+            <span class="emoji">⚡</span><span>RISCO</span><span class="emoji">⚡</span>
+        </a>
+
+        <a class="btn" href="#" onclick="definirTipo('OUTROS'); iniciarLocalizacao();return false;">
+            <span class="emoji">❔</span><span>OUTROS</span><span class="emoji">❔</span>
+        </a>
+
+        <div class="footer">Sistema de resposta rápida institucional</div>
+    </div>
+
+    <div id="lightbox">
+        <div class="lightbox-content">
+            <div class="spinner"></div>
+            <p><b>Localizando</b><br>Melhorando precisão do GPS</p>
+            <button id="btnForcar" onclick="enviarSemPrecisao()">Enviar sem precisão</button>
+        </div>
+    </div>
+    <script type="module" src="../scripts/app.js"></script>
+</body>
+</html>
