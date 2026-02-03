@@ -13,7 +13,7 @@ let escalonadorID = null;       // setInterval do escalonamento
 let timeoutInicialID = null;    // setTimeout da janela inicial (5s)
 let enviouMensagem = false;
 
-// ===== NOVO: controlar quando contadores podem começar =====
+// ===== controlar quando contadores podem começar =====
 let iniciouContadores = false;
 let timeoutMaxID = null;        // setTimeout do tempo máximo (20s)
 
@@ -36,8 +36,6 @@ function definirTipo(tipo){
 function mostrarLightbox(texto){
   document.getElementById("lightbox").style.display="flex";
   document.querySelector("#lightbox p").innerHTML = texto;
-
-  // quando inicia uma nova tentativa, botão começa oculto
   document.getElementById("btnForcar").style.display = "none";
 }
 
@@ -47,15 +45,47 @@ function esconderLightbox(){
   clearTimeout(timerSemGps);
 }
 
-// ===== NOVO: iniciar escalonamento + tempo máximo só quando houver sinal real do GPS =====
+// ===== NOVO: probe curto para verificar se a localização está realmente disponível =====
+function testarLocalizacaoDisponivel() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ ok: false, motivo: "Geolocalização não suportada neste dispositivo." });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          ok: true,
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          acc: pos.coords.accuracy
+        });
+      },
+      (err) => {
+        const motivo =
+          err?.code === 1 ? "Permissão de localização negada." :
+          err?.code === 2 ? "Localização indisponível. Ative a localização (GPS) do celular." :
+          err?.code === 3 ? "Sem resposta da localização. Verifique se o GPS está ativado." :
+          "Falha ao obter a localização.";
+        resolve({ ok: false, motivo });
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 3000 // probe curto para detectar “GPS desligado/sem resposta”
+      }
+    );
+  });
+}
+
+// ===== iniciar escalonamento + tempo máximo só quando houver sinal real do GPS =====
 function iniciarContadoresSeNecessario() {
   if (iniciouContadores) return;
   iniciouContadores = true;
 
-  // inicia escalonamento (5s -> libera botão -> relaxa meta)
   iniciarEscalonamentoMeta();
 
-  // inicia deadline (tempo máximo)
   const TEMPO_MAX_MS = 20000;
   if (timeoutMaxID) clearTimeout(timeoutMaxID);
   timeoutMaxID = setTimeout(() => {
@@ -74,124 +104,128 @@ function iniciarContadoresSeNecessario() {
 function iniciarLocalizacao(){
 
   if(!navigator.geolocation){
-    enviarMensagem(null,null,null);
+    enviarMensagem(null,null,null, "Geolocalização não suportada neste dispositivo.");
     return;
   }
 
-  // reset de valores
+  // reset estado
   ultimoLat = null;
   ultimoLon = null;
   ultimaPrecisao = null;
 
-  // reset da lógica
   metaPrecisao = 15;
   botaoLiberado = false;
   enviouMensagem = false;
 
-  // reset contadores
+  // reset contadores/timers
   iniciouContadores = false;
-  if (timeoutMaxID) {
-    clearTimeout(timeoutMaxID);
-    timeoutMaxID = null;
-  }
-  if (timeoutInicialID) {
-    clearTimeout(timeoutInicialID);
-    timeoutInicialID = null;
-  }
-  if (escalonadorID) {
-    clearInterval(escalonadorID);
-    escalonadorID = null;
-  }
+  if (timeoutMaxID) { clearTimeout(timeoutMaxID); timeoutMaxID = null; }
+  if (timeoutInicialID) { clearTimeout(timeoutInicialID); timeoutInicialID = null; }
+  if (escalonadorID) { clearInterval(escalonadorID); escalonadorID = null; }
+  if (watchID) { navigator.geolocation.clearWatch(watchID); watchID = null; }
 
-  // ===== Feedback inicial (AJUSTADO) =====
+  // ===== Feedback inicial =====
   mostrarLightbox("<b>Buscando localização…</b><br>Ative a localização e permita o acesso, se solicitado.");
   atualizarLightbox({
     titulo: "Buscando localização…",
     linha1: `Meta inicial: ${metaPrecisao}m`,
-    rodape: "O tempo começa a contar quando o GPS responder."
+    rodape: "Confirmando se o GPS está ativo…"
   });
 
-  watchID = navigator.geolocation.watchPosition(
-    pos => {
-      // primeiro sinal real do GPS -> agora pode contar tempo e escalonar
-      iniciarContadoresSeNecessario();
+  // ===== Probe: só começa o processo se a localização estiver respondendo =====
+  testarLocalizacaoDisponivel().then((res) => {
+    if (enviouMensagem) return;
 
-      ultimoLat = pos.coords.latitude;
-      ultimoLon = pos.coords.longitude;
-      ultimaPrecisao = pos.coords.accuracy;
-
-      // TEMPORÁRIO
-      console.log("[GPS]", {
-        lat: ultimoLat,
-        lon: ultimoLon,
-        acc: ultimaPrecisao,
-        meta: metaPrecisao
+    if (!res.ok) {
+      // Não inicia watch nem contadores. Não libera botão.
+      atualizarLightbox({
+        titulo: "Localização desativada",
+        linha1: res.motivo,
+        rodape: "Ative o GPS e toque novamente para tentar."
       });
-
-      // ===== Feedback durante a localização =====
-      const temCoords = coordenadasValidas(ultimoLat, ultimoLon);
-
-      if (!temCoords) {
-        atualizarLightbox({
-          titulo: "Buscando localização…",
-          linha1: "Obtendo coordenadas do dispositivo.",
-          linha2: `Meta: ${metaPrecisao}m`,
-          rodape: "Se estiver em ambiente fechado, a precisão pode ser limitada."
-        });
-      } else {
-        atualizarLightbox({
-          titulo: "Aprimorando precisão…",
-          linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
-          linha2: `Meta: ${metaPrecisao}m`,
-          rodape: botaoLiberado ? "Você já pode enviar sem meta de precisão." : "Aguardando uma leitura mais precisa."
-        });
-      }
-
-      // envio automático quando atingiu a meta
-      if(ultimaPrecisao !== null && ultimaPrecisao <= metaPrecisao){
-        atualizarLightbox({
-          titulo: "Meta atingida ✅",
-          linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
-          linha2: "Enviando alerta…"
-        });
-
-        pararLocalizacao();
-        enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
-      }
-    },
-    err => {
-      // primeiro erro também conta como resposta do GPS (permite iniciarContadores para consistência)
-      iniciarContadoresSeNecessario();
-
-      pararLocalizacao();
-
-      const motivo =
-        err?.code === 1 ? "Permissão de localização negada." :
-        err?.code === 2 ? "Não foi possível obter o GPS (sinal fraco/indisponível)." :
-        err?.code === 3 ? "Tempo esgotado ao tentar obter a localização." :
-        "Falha ao obter a localização.";
-
-      mostrarLightbox(`<b>Localização indisponível</b><br>${motivo}<br><br>Enviando alerta sem coordenadas…`);
-      enviarMensagem(null, null, null, motivo);
-    },
-    {
-      enableHighAccuracy:true,
-      maximumAge:0,
-      timeout:20000
+      return;
     }
-  );
+
+    // Se o probe deu ok, atualiza os últimos valores iniciais (ajuda UX)
+    ultimoLat = res.lat;
+    ultimoLon = res.lon;
+    ultimaPrecisao = res.acc;
+
+    atualizarLightbox({
+      titulo: "Localização detectada ✅",
+      linha1: `Precisão inicial: ${textoPrecisao(ultimaPrecisao)}`,
+      linha2: `Meta: ${metaPrecisao}m`,
+      rodape: "Aprimorando precisão…"
+    });
+
+    // Agora sim: inicia contadores + watch
+    iniciarContadoresSeNecessario();
+
+    watchID = navigator.geolocation.watchPosition(
+      pos => {
+        ultimoLat = pos.coords.latitude;
+        ultimoLon = pos.coords.longitude;
+        ultimaPrecisao = pos.coords.accuracy;
+
+        // Feedback durante a localização
+        const temCoords = coordenadasValidas(ultimoLat, ultimoLon);
+
+        if (!temCoords) {
+          atualizarLightbox({
+            titulo: "Buscando localização…",
+            linha1: "Obtendo coordenadas do dispositivo.",
+            linha2: `Meta: ${metaPrecisao}m`,
+            rodape: "Se estiver em ambiente fechado, a precisão pode ser limitada."
+          });
+        } else {
+          atualizarLightbox({
+            titulo: "Aprimorando precisão…",
+            linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
+            linha2: `Meta: ${metaPrecisao}m`,
+            rodape: botaoLiberado ? "Você já pode enviar sem meta de precisão." : "Aguardando uma leitura mais precisa."
+          });
+        }
+
+        // Envio automático ao atingir meta
+        if (ultimaPrecisao !== null && ultimaPrecisao <= metaPrecisao) {
+          atualizarLightbox({
+            titulo: "Meta atingida ✅",
+            linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
+            linha2: "Enviando alerta…"
+          });
+
+          pararLocalizacao();
+          enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
+        }
+      },
+      err => {
+        pararLocalizacao();
+
+        const motivo =
+          err?.code === 1 ? "Permissão de localização negada." :
+          err?.code === 2 ? "Localização indisponível. Ative a localização (GPS) do celular." :
+          err?.code === 3 ? "Tempo esgotado ao tentar obter a localização." :
+          "Falha ao obter a localização.";
+
+        mostrarLightbox(`<b>Localização indisponível</b><br>${motivo}<br><br>Enviando alerta sem coordenadas…`);
+        enviarMensagem(null, null, null, motivo);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 20000
+      }
+    );
+  });
 }
 
 function iniciarEscalonamentoMeta() {
-  // limpa por segurança
   if (timeoutInicialID) clearTimeout(timeoutInicialID);
   if (escalonadorID) clearInterval(escalonadorID);
 
-  // 1) janela inicial de 5s tentando 15m
   timeoutInicialID = setTimeout(() => {
     liberarBotaoSemPrecisao();
 
-    // 2) após 5s, relaxa a meta 10m a cada 2s
     escalonadorID = setInterval(() => {
       metaPrecisao += 10;
 
@@ -201,8 +235,7 @@ function iniciarEscalonamentoMeta() {
         linha2: `Meta ajustada: ${metaPrecisao}m`,
         rodape: "Se a meta não for atingida, você ainda pode enviar manualmente."
       });
-      
-      // se já tem coords e a meta ficou suficiente, dispara envio
+
       if (coordenadasValidas(ultimoLat, ultimoLon) && ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
         atualizarLightbox({
           titulo: "Meta atingida ✅",
@@ -266,7 +299,7 @@ function pararLocalizacao(){
 /* ===== Root correto para GitHub Pages (project pages) ===== */
 function obterRootDoSite() {
   const { origin, pathname } = window.location;
-  const antesDePages = pathname.split("/pages/")[0]; // ex.: "/UniFacensSOS" ou ""
+  const antesDePages = pathname.split("/pages/")[0];
   return origin + antesDePages;
 }
 
@@ -285,9 +318,7 @@ function enviarMensagem(lat, lon, accuracy, motivo = null){
   if (enviouMensagem) return;
   enviouMensagem = true;
   enviarViaWhatsApp(lat, lon, accuracy, motivo);
-
-  // ===== CAMINHO SMS =====
-  // enviarViaSMS(lat,lon,accuracy);
+  // enviarViaSMS(lat, lon, accuracy);
 }
 
 function coordenadasValidas(lat, lon) {
@@ -333,11 +364,7 @@ Precisão: ${prec}`;
   const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
 
   const popup = window.open(url, "_blank");
-
-  // Se o navegador bloquear o pop-up, abre na mesma aba
-  if (!popup) {
-    window.location.href = url;
-  }
+  if (!popup) window.location.href = url;
 }
 
 function enviarViaSMS(lat, lon, accuracy) {
