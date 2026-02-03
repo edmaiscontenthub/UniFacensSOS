@@ -3,8 +3,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const routes = {
     'index.html': () => import('./main.js'),
-    'massage.html': () => import('./message.js'),
+    'message.html': () => import('./message.js'),
+    'map.html': () => import('./map.js'),
+    
   };
+  
 
   const loader = routes[page];
   if (!loader) {
