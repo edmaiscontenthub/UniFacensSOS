@@ -2,7 +2,7 @@
 padding: 0;
 margin: 0;
 box-sizing: border-box;
-font-family: Arial, Helvetica, sans-serif;
+font-family: "Reddit Sans Condensed", Arial, sans-serif;
 }
 
 :root{
@@ -10,6 +10,12 @@ font-family: Arial, Helvetica, sans-serif;
   --vermelho-claro: #e53935;
   --cinza: #2b2b2b;
   --branco: #ffffff;
+
+  --black: #3c3c3b;
+  --white: #ffffff;
+  --red: #e23333;
+  --pink: #ffc5c5;
+  --gray: #9d9d9c;
 }
 
 a {

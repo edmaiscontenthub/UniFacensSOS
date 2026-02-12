@@ -3,23 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniFacens SOS – Sistema Emergencial do Campus</title>
     <link rel="stylesheet" href="../styles/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans+Condensed:wght@200..900&display=swap" rel="stylesheet">
+    <title>UniFacens SOS – Sistema Emergencial do Campus</title>
 </head>
 <body data-page="home">
-    <div class="container" id="main">
-        <div class="logo">🚨</div>
-        <h1>UniFacens SOS</h1>
-        <p>Selecione o tipo de contato.</p>
-
-        <a class="btn" href="tel:+5515999999999">
-            <span class="emoji">📞</span><span>LIGAÇÃO</span><span class="emoji">💬</span>
-        </a>
-        <a class="btn" href="message.html">
-            <span class="emoji">📲</span><span>MENSAGEM + LOCALIZAÇÃO</span><span class="emoji">🗺️</span>
-        </a>
-
-        <div class="footer">Sistema de resposta rápida institucional</div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="../assets/UniFacens.svg" alt="">
+            </div>
+        </header>
+        <main>
+            <div class="title">
+                <img src="../assets/Icone_SOS.svg" alt="">
+                <h1>SOS</h1>
+            </div>
+            <p>Selecione o tipo de contato.</p>
+    
+            <a class="btn" href="call.html">
+                <img src="../assets/Icone_Lig.svg" alt="">
+                <span>Ligação</span>
+            </a>
+            <a class="btn" href="message.html">
+                <img src="../assets/Icone_Mens.svg" alt="">
+                <span>Mensagem e<br/>Localização</span>
+            </a>
+        </main>
+        <footer>
+            <span>Sistema de resposta rápida institucional</span>
+        </footer>
     </div>
     <script type="module" src="../scripts/app.js"></script>
 </body>

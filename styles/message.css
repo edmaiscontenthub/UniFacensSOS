@@ -1,4 +1,4 @@
-body[data-page="message"] {
+body[data-page="message1"] {
     min-height: 100dvh;
     background: linear-gradient(180deg,#1a1a1a,#000);
     display: flex;
@@ -6,7 +6,7 @@ body[data-page="message"] {
     align-items: center;
     padding-block: 16px;
 
-    & .container#message{
+    & .container{
         width: 90%;
         max-width: 420px;
         background: var(--cinza);
