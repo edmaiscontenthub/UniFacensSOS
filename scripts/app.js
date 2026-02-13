@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', async () => {
+
+  const utils = await import('./utils.js')
+  if (utils.initGlobal) utils.initGlobal()
+
   const page = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   const routes = {
-    'index.html': () => import('./home.js'),
+    'home.html': () => import('./home.js'),
+    'call.html': () => import('./call.js'),
     'message.html': () => import('./message.js'),
     'map.html': () => import('./map.js'),
-    
   };
-  
 
   const loader = routes[page];
   if (!loader) {
@@ -21,4 +24,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.error(`[UniFacens SOS] Erro ao carregar módulo da página (${page}):`, err);
   }
+
 });

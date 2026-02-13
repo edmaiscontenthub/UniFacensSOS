@@ -1,4 +1,4 @@
-body[data-page="home"] {
+body[data-page="call"] {
 
     & .container {
 
@@ -6,7 +6,7 @@ body[data-page="home"] {
 
             & .btn {
     
-                &#call {
+                &#gatehouse {
     
                     & img#normal {
                         opacity: 1;
@@ -19,16 +19,38 @@ body[data-page="home"] {
                     &:hover {
             
                         & img#normal {
-                        opacity: 0;
+                            opacity: 0;
                         }
             
                         & img#hover {
-                        opacity: 1;
+                            opacity: 1;
                         }
                     }
                 }
     
-                &#message {
+                &#clinic {
+    
+                    & img#normal {
+                        opacity: 1;
+                    }
+        
+                    & img#hover {
+                        opacity: 0;
+                    }
+    
+                    &:hover {
+            
+                        & img#normal {
+                            opacity: 0;
+                        }
+            
+                        & img#hover {
+                            opacity: 1;
+                        }
+                    }
+                }
+
+                &#occupational-safety {
     
                     & img#normal {
                         opacity: 1;

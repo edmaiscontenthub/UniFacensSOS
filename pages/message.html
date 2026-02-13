@@ -9,48 +9,112 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans+Condensed:wght@200..900&display=swap" rel="stylesheet">
 </head>
-<body data-page="home">
+<body data-page="message">
     <div class="container">
         <header>
             <a href="home.html" class="back">
-                <img src="../assets/Botão_Back.svg" alt="">
+                <img src="../assets/images/return.svg" alt="">
             </a>
             <div class="logo">
-                <img src="../assets/UniFacens.svg" alt="">
+                <img src="../assets/images/unifacens-logo.svg" alt="">
+            </div>
+            <div class="title">
+                <img src="../assets/images/sos.svg" alt="">
+                <h1>SOS</h1>
             </div>
         </header>
         <main>
-            <div class="title">
-                <img src="../assets/Icone_SOS.svg" alt="">
-                <h1>SOS</h1>
+            <p>Selecione o tipo de ocorrência.</p>
+
+            <div class="grid">
+                <a class="btn" id="first-aid" href="#" onclick="definirTipo('PRIMEIROS SOCORROS'); iniciarLocalizacao(); return false;">
+                    <div class="btn-image">
+                        <img id="normal" src="../assets/images/first-aid.svg" alt="">
+                        <img id="hover" src="../assets/images/first-aid-hover.svg" alt="">
+                    </div>
+                    <span>Primeiros Socorros</span>
+                </a>
+        
+                <a class="btn" id="fire" href="#" onclick="definirTipo('INCÊNDIO'); iniciarLocalizacao(); return false;">
+                    <div class="btn-image">
+                        <img id="normal" src="../assets/images/fire.svg" alt="">
+                        <img id="hover" src="../assets/images/fire-hover.svg" alt="">
+                    </div>
+                    <span>Incêndio</span>
+                </a>
+        
+                <a class="btn" id="risk" href="#" onclick="definirTipo('RISCO'); iniciarLocalizacao(); return false;">
+                    <div class="btn-image">
+                        <img id="normal" src="../assets/images/risk.svg" alt="">
+                        <img id="hover" src="../assets/images/risk-hover.svg" alt="">
+                    </div>
+                    <span>Risco</span>
+                </a>
+    
+                <a class="btn" id="other" href="#" onclick="definirTipo('OUTROS'); iniciarLocalizacao(); return false;">
+                    <div class="btn-image">
+                        <img id="normal" src="../assets/images/other.svg" alt="">
+                        <img id="hover" src="../assets/images/other-hover.svg" alt="">
+                    </div>
+                    <span>Outros</span>
+                </a>
             </div>
     
-            <p>Selecione o tipo de ocorrência.</p>
-    
-            <a class="btn" href="#" onclick="definirTipo('PRIMEIROS SOCORROS'); iniciarLocalizacao(); return false;">
-                <img src="../assets/Icone_Amb.svg" alt="">
-                <span>Primeiros Socorros</span>
-            </a>
-    
-            <a class="btn" href="#" onclick="definirTipo('INCÊNDIO'); iniciarLocalizacao(); return false;">
-                <img src="../assets/Icone_Amb.svg" alt="">
-                <span>Incêndio</span>
-            </a>
-    
-            <a class="btn" href="#" onclick="definirTipo('RISCO'); iniciarLocalizacao(); return false;">
-                <img src="../assets/Icone_Seg.svg" alt="">
-                <span>Risco</span>
-            </a>
-
-            <a class="btn" href="#" onclick="definirTipo('OUTROS'); iniciarLocalizacao(); return false;">
-                <img src="../assets/Icone_Seg.svg" alt="">
-                <span>Outros</span>
-            </a>
+            <p>Sistema de resposta rápida institucional</p>     
         </main>
         <footer>
-            <span>Sistema de resposta rápida institucional</span>
+            <p>&lt;/ Developed by ED+ Content Hub &gt;</p>
         </footer>
     </div>
+
+    <!-- <div id="lightbox">
+        <div class="lightbox-content">
+            <div class="spinner"></div>
+            <p><b>Localizando...</b><br>Melhorando precisão do GPS</p>
+            <button id="btnForcar" onclick="enviarSemPrecisao()">Enviar sem precisão</button>
+        </div>
+    </div> -->
+
+    <!-- Overlay / Lightbox -->
+    <div id="lightbox" class="lb is-hidden" aria-live="polite" aria-busy="false">
+        <div class="lb__card" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+
+            <!-- Cabeçalho (fixo no HTML) -->
+            <div class="lb__header">
+                <div class="lb__spinner" aria-hidden="true"></div>
+                <div class="lb__titles">
+                    <div id="lbTitle" class="lb__title">Buscando localização…</div>
+                    <div id="lbSubtitle" class="lb__subtitle">Ative o GPS e permita o acesso, se solicitado.</div>
+                </div>
+            </div>
+
+            <!-- Conteúdo (JS só preenche spans) -->
+            <div class="lb__body">
+                <div class="lb__row">
+                    <span class="lb__label">Precisão atual</span>
+                    <span id="lbAccuracy" class="lb__value">—</span>
+                </div>
+
+                <div class="lb__row">
+                    <span class="lb__label">Meta</span>
+                    <span id="lbTarget" class="lb__value">15m</span>
+                </div>
+
+                <div id="lbHint" class="lb__hint">
+                    Isso pode levar alguns segundos.
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="lb__actions">
+                <button id="btnForcar" class="btn btn--danger is-hidden" type="button">
+                    Enviar sem localização
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <script type="module" src="../scripts/app.js"></script>
 </body>
 </html>

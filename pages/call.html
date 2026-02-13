@@ -9,41 +9,52 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans+Condensed:wght@200..900&display=swap" rel="stylesheet">
 </head>
-<body data-page="home">
+<body data-page="call">
     <div class="container">
         <header>
             <a href="home.html" class="back">
-                <img src="../assets/Botão_Back.svg" alt="">
+                <img src="../assets/images/return.svg" alt="">
             </a>
             <div class="logo">
-                <img src="../assets/UniFacens.svg" alt="">
+                <img src="../assets/images/unifacens-logo.svg" alt="">
+            </div>
+            <div class="title">
+                <img src="../assets/images/sos.svg" alt="">
+                <h1>SOS</h1>
             </div>
         </header>
         <main>
-            <div class="title">
-                <img src="../assets/Icone_SOS.svg" alt="">
-                <h1>SOS</h1>
-            </div>
     
             <p>Selecione o contato telefônico.</p>
     
-            <a class="btn" href="tel:+5515991966412">
-                <img src="../assets/Icone_Port.svg" alt="">
+            <a class="btn" id="gatehouse" href="tel:+5515991966412">
+                <div class="btn-image">
+                    <img id="normal" src="../assets/images/gatehouse.svg" alt="">
+                    <img id="hover" src="../assets/images/gatehouse-hover.svg" alt="">
+                </div>
                 <span>Portaria</span>
             </a>
     
-            <a class="btn" href="tel:+5515981403334">
-                <img src="../assets/Icone_Amb.svg" alt="">
+            <a class="btn" id="clinic" href="tel:+5515981403334">
+                <div class="btn-image">
+                    <img id="normal" src="../assets/images/clinic.svg" alt="">
+                    <img id="hover" src="../assets/images/clinic-hover.svg" alt="">
+                </div>
                 <span>Ambulatório</span>
             </a>
     
-            <a class="btn" href="tel:+5515999999999">
-                <img src="../assets/Icone_Seg.svg" alt="">
+            <a class="btn" id="occupational-safety" href="tel:+5515988264845">
+                <div class="btn-image">
+                    <img id="normal" src="../assets/images/occupational-safety.svg" alt="">
+                    <img id="hover" src="../assets/images/occupational-safety-hover.svg" alt="">
+                </div>
                 <span>Segurança do Trabalho</span>
             </a>
+
+            <p>Sistema de resposta rápida institucional</p>
         </main>
         <footer>
-            <span>Sistema de resposta rápida institucional</span>
+            <p>&lt;/ Developed by ED+ Content Hub &gt;</p>
         </footer>
     </div>
     <script type="module" src="../scripts/app.js"></script>

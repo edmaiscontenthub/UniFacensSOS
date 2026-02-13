@@ -13,27 +13,35 @@
     <div class="container">
         <header>
             <div class="logo">
-                <img src="../assets/UniFacens.svg" alt="">
+                <img src="../assets/images/unifacens-logo.svg" alt="">
+            </div>
+            <div class="title">
+                <img src="../assets/images/sos.svg" alt="">
+                <h1>SOS</h1>
             </div>
         </header>
         <main>
-            <div class="title">
-                <img src="../assets/Icone_SOS.svg" alt="">
-                <h1>SOS</h1>
-            </div>
             <p>Selecione o tipo de contato.</p>
     
-            <a class="btn" href="call.html">
-                <img src="../assets/Icone_Lig.svg" alt="">
+            <a class="btn" id="call" href="call.html">
+                <div class="btn-image">
+                    <img id="normal" src="../assets/images/call.svg" alt="">
+                    <img id="hover" src="../assets/images/call-hover.svg" alt="">
+                </div>
                 <span>Ligação</span>
             </a>
-            <a class="btn" href="message.html">
-                <img src="../assets/Icone_Mens.svg" alt="">
-                <span>Mensagem e<br/>Localização</span>
+            <a class="btn" id="message" href="message.html">
+                <div class="btn-image">
+                    <img id="normal" src="../assets/images/message.svg" alt="">
+                    <img id="hover" src="../assets/images/message-hover.svg" alt="">
+                </div>
+                <span>Mensagem e<br>Localização</span>
             </a>
+
+            <p>Sistema de resposta rápida institucional</p>
         </main>
         <footer>
-            <span>Sistema de resposta rápida institucional</span>
+            <p>&lt;/ Developed by ED+ Content Hub &gt;</p>
         </footer>
     </div>
     <script type="module" src="../scripts/app.js"></script>

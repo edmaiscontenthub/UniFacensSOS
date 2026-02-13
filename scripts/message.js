@@ -1,24 +1,18 @@
 /**
- * UniFacens SOS — message.js
- * Fluxo:
- * 1) Usuário clica no botão -> iniciaLocalizacao()
- * 2) watchPosition tenta obter coordenadas e melhorar precisão
- * 3) Meta inicial: 15m (por 5s). Após 5s: libera botão e relaxa meta (+10m a cada 2s)
- * 4) Se atingir a meta, envia automaticamente pelo WhatsApp
- * 5) Tempo máximo: 20s -> envia com coordenadas (se existirem) ou sem coordenadas
- *
- * Observações:
- * - Removido: validação "probe" (getCurrentPosition antes do watch)
- * - Removido: envio por SMS
- * - Mantido: link de mapa compatível com GitHub Pages (project pages)
+ * UniFacens SOS — message.js (versão limpa)
+ * - Configurações foram para HTML/CSS
+ * - JS apenas:
+ *   1) liga/desliga lightbox
+ *   2) atualiza textos (precisão/meta/status)
+ *   3) controla timers e envio
+ * - Sem "probe" e sem SMS
  */
 
 // ======================
-// CONFIGURAÇÕES
+// CONFIG
 // ======================
 const NUMERO_DESTINO = "5515981144802";
 
-// Ajuste de tempos/metas
 const META_INICIAL_M = 15;
 const TEMPO_JANELA_INICIAL_MS = 5000;
 const PASSO_RELAXAMENTO_M = 10;
@@ -26,7 +20,7 @@ const PASSO_RELAXAMENTO_MS = 2000;
 const TEMPO_MAXIMO_MS = 20000;
 
 // ======================
-// ESTADO (RUNTIME)
+// STATE
 // ======================
 let watchID = null;
 
@@ -39,43 +33,67 @@ let metaPrecisao = META_INICIAL_M;
 let botaoLiberado = false;
 let enviouMensagem = false;
 
-// Timers (para limpar corretamente)
-let escalonadorID = null;     // interval de relaxamento (a cada 2s)
-let timeoutInicialID = null;  // timeout da janela inicial (5s)
-let timeoutMaxID = null;      // timeout do tempo máximo (20s)
+let escalonadorID = null;
+let timeoutInicialID = null;
+let timeoutMaxID = null;
 
 // ======================
-// UI — LIGHTBOX
+// DOM (cache)
 // ======================
-function textoPrecisao(accuracy) {
-  return (accuracy != null) ? `${Math.round(accuracy)}m` : "—";
-}
-
-function mostrarLightbox(html) {
-  const box = document.getElementById("lightbox");
-  box.style.display = "flex";
-  document.querySelector("#lightbox p").innerHTML = html;
-
-  // ao iniciar uma tentativa, o botão começa oculto
-  const btn = document.getElementById("btnForcar");
-  if (btn) btn.style.display = "none";
-}
-
-function atualizarLightbox({ titulo, linha1 = "", linha2 = "", rodape = "" }) {
-  const linhas = [linha1, linha2].filter(Boolean).join("<br>");
-  const extra = rodape ? `<br><br><small style="opacity:.85">${rodape}</small>` : "";
-  document.querySelector("#lightbox p").innerHTML =
-    `<b>${titulo}</b>${linhas ? "<br>" + linhas : ""}${extra}`;
-}
-
-function esconderLightbox() {
-  const box = document.getElementById("lightbox");
-  if (box) box.style.display = "none";
-}
+const dom = {
+  lightbox: () => document.getElementById("lightbox"),
+  title: () => document.getElementById("lbTitle"),
+  subtitle: () => document.getElementById("lbSubtitle"),
+  accuracy: () => document.getElementById("lbAccuracy"),
+  target: () => document.getElementById("lbTarget"),
+  hint: () => document.getElementById("lbHint"),
+  btnForcar: () => document.getElementById("btnForcar"),
+};
 
 // ======================
-// CONTROLE DE ESTADO
+// UI helpers
 // ======================
+function fmtM(value) {
+  return (value != null) ? `${Math.round(value)}m` : "—";
+}
+
+function abrirLightbox() {
+  const lb = dom.lightbox();
+  if (!lb) return;
+  lb.classList.remove("is-hidden");
+  lb.setAttribute("aria-busy", "true");
+}
+
+function fecharLightbox() {
+  const lb = dom.lightbox();
+  if (!lb) return;
+  lb.classList.add("is-hidden");
+  lb.setAttribute("aria-busy", "false");
+}
+
+function setTexto({ title, subtitle, accuracy, target, hint }) {
+  const t = dom.title(); if (t && title != null) t.textContent = title;
+  const s = dom.subtitle(); if (s && subtitle != null) s.textContent = subtitle;
+  const a = dom.accuracy(); if (a && accuracy != null) a.textContent = accuracy;
+  const m = dom.target(); if (m && target != null) m.textContent = target;
+  const h = dom.hint(); if (h && hint != null) h.textContent = hint;
+}
+
+function mostrarBtnForcar(mostrar) {
+  const btn = dom.btnForcar();
+  if (!btn) return;
+  btn.classList.toggle("is-hidden", !mostrar);
+}
+
+// ======================
+// timers / reset
+// ======================
+function limparTimers() {
+  if (timeoutInicialID) { clearTimeout(timeoutInicialID); timeoutInicialID = null; }
+  if (escalonadorID) { clearInterval(escalonadorID); escalonadorID = null; }
+  if (timeoutMaxID) { clearTimeout(timeoutMaxID); timeoutMaxID = null; }
+}
+
 function resetarEstado() {
   ultimoLat = null;
   ultimoLon = null;
@@ -86,59 +104,30 @@ function resetarEstado() {
   enviouMensagem = false;
 }
 
-function limparTimers() {
-  if (timeoutInicialID) {
-    clearTimeout(timeoutInicialID);
-    timeoutInicialID = null;
-  }
-  if (escalonadorID) {
-    clearInterval(escalonadorID);
-    escalonadorID = null;
-  }
-  if (timeoutMaxID) {
-    clearTimeout(timeoutMaxID);
-    timeoutMaxID = null;
-  }
-}
-
 function pararLocalizacao() {
-  // para GPS
   if (watchID) {
     navigator.geolocation.clearWatch(watchID);
     watchID = null;
   }
-
-  // para timers
   limparTimers();
-
-  // fecha UI
-  esconderLightbox();
+  fecharLightbox();
 }
 
 // ======================
-// VALIDAÇÃO / LINK DO MAPA
+// link do mapa (GitHub Pages ok)
 // ======================
 function coordenadasValidas(lat, lon) {
   const latNum = Number(lat);
   const lonNum = Number(lon);
-
   if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return false;
   if (latNum < -90 || latNum > 90) return false;
   if (lonNum < -180 || lonNum > 180) return false;
-
-  // bloqueia coordenadas zeradas
   if (latNum === 0 && lonNum === 0) return false;
-
   return true;
 }
 
-/**
- * GitHub Pages (project pages) exige incluir /RepoName/ na base.
- * Ex.: https://usuario.github.io/UniFacensSOS/pages/map.html
- */
 function obterRootDoSite() {
   const { origin, pathname } = window.location;
-  // pega tudo antes de "/pages/" (ex.: "/UniFacensSOS" ou "")
   const antesDePages = pathname.split("/pages/")[0];
   return origin + antesDePages;
 }
@@ -158,16 +147,12 @@ function obterTextoLinkMapa(lat, lon) {
 }
 
 // ======================
-// ENVIO — WHATSAPP
+// WhatsApp
 // ======================
 function enviarMensagem(lat, lon, accuracy, motivo = null) {
   if (enviouMensagem) return;
   enviouMensagem = true;
 
-  enviarViaWhatsApp(lat, lon, accuracy, motivo);
-}
-
-function enviarViaWhatsApp(lat, lon, accuracy, motivo) {
   const link = obterTextoLinkMapa(lat, lon);
   const prec = (accuracy != null) ? `${Math.round(accuracy)} metros` : "Não disponível";
 
@@ -175,7 +160,6 @@ function enviarViaWhatsApp(lat, lon, accuracy, motivo) {
     ? "Localização obtida."
     : (motivo ? `Localização indisponível: ${motivo}` : "Localização indisponível.");
 
-  // IMPORTANTÍSSIMO: sem indentação (WhatsApp preserva espaços)
   const msg = [
     "PEDIDO DE AJUDA",
     "",
@@ -185,27 +169,18 @@ function enviarViaWhatsApp(lat, lon, accuracy, motivo) {
     "",
     `Precisão: ${prec}`,
     "",
-    `Localização: ${link}`
+    `Localização: ${link}`,
   ].join("\n");
 
   const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
 
-  // abre em nova aba quando permitido; fallback abre na mesma aba
   const popup = window.open(url, "_blank");
   if (!popup) window.location.href = url;
 }
 
 // ======================
-// FLUXO DE LOCALIZAÇÃO
+// fluxo principal
 // ======================
-function definirTipo(tipo) {
-  tipoEmergencia = tipo;
-}
-
-/**
- * Inicia o cronômetro máximo (20s).
- * Se estourar, envia com coords se existirem, ou sem coords.
- */
 function iniciarTimeoutMaximo() {
   timeoutMaxID = setTimeout(() => {
     if (enviouMensagem) return;
@@ -220,37 +195,35 @@ function iniciarTimeoutMaximo() {
   }, TEMPO_MAXIMO_MS);
 }
 
-/**
- * Escalonamento:
- * - 5s tentando a meta inicial
- * - após 5s: libera botão e relaxa meta (+10m a cada 2s)
- */
-function iniciarEscalonamentoMeta() {
-  limparTimers(); // garante que não acumule timers
+function liberarBotaoSemPrecisao() {
+  if (botaoLiberado) return;
+  botaoLiberado = true;
 
+  mostrarBtnForcar(true);
+  setTexto({
+    hint: "Você já pode enviar sem meta de precisão."
+  });
+}
+
+function iniciarEscalonamentoMeta() {
   timeoutInicialID = setTimeout(() => {
     liberarBotaoSemPrecisao();
 
     escalonadorID = setInterval(() => {
       metaPrecisao += PASSO_RELAXAMENTO_M;
 
-      atualizarLightbox({
-        titulo: "Aprimorando precisão…",
-        linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
-        linha2: `Meta ajustada: ${metaPrecisao}m`,
-        rodape: "Se a meta não for atingida, você ainda pode enviar manualmente."
+      setTexto({
+        title: "Aprimorando precisão…",
+        subtitle: "Tentando obter uma leitura mais precisa.",
+        accuracy: fmtM(ultimaPrecisao),
+        target: `${metaPrecisao}m`,
+        hint: "Se a meta não for atingida, você ainda pode enviar manualmente."
       });
 
-      // se a meta ficou suficiente, dispara envio
-      if (
-        coordenadasValidas(ultimoLat, ultimoLon) &&
-        ultimaPrecisao != null &&
-        ultimaPrecisao <= metaPrecisao
-      ) {
-        atualizarLightbox({
-          titulo: "Meta atingida ✅",
-          linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
-          linha2: "Enviando alerta…"
+      if (coordenadasValidas(ultimoLat, ultimoLon) && ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
+        setTexto({
+          title: "Meta atingida ✅",
+          subtitle: "Enviando alerta…"
         });
 
         pararLocalizacao();
@@ -260,44 +233,30 @@ function iniciarEscalonamentoMeta() {
   }, TEMPO_JANELA_INICIAL_MS);
 }
 
-function liberarBotaoSemPrecisao() {
-  if (botaoLiberado) return;
-  botaoLiberado = true;
-
-  const btn = document.getElementById("btnForcar");
-  if (btn) btn.style.display = "block";
-
-  atualizarLightbox({
-    titulo: "Aprimorando precisão…",
-    linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
-    linha2: `Meta: ${metaPrecisao}m`,
-    rodape: "Você já pode enviar sem meta de precisão."
-  });
-}
-
 function iniciarLocalizacao() {
   if (!navigator.geolocation) {
     enviarMensagem(null, null, null, "Geolocalização não suportada neste dispositivo.");
     return;
   }
 
-  // encerra tentativa anterior (se houver) e reseta
-  pararLocalizacao();
+  pararLocalizacao(); // encerra tentativa anterior (se houver)
   resetarEstado();
 
-  // feedback inicial
-  mostrarLightbox("<b>Buscando localização…</b><br>Ative a localização e permita o acesso, se solicitado.");
-  atualizarLightbox({
-    titulo: "Buscando localização…",
-    linha1: `Meta inicial: ${metaPrecisao}m`,
-    rodape: "Isso pode levar alguns segundos."
+  abrirLightbox();
+  mostrarBtnForcar(false);
+
+  // Estado inicial no HTML (JS só confirma valores dinâmicos)
+  setTexto({
+    title: "Buscando localização…",
+    subtitle: "Ative o GPS e permita o acesso, se solicitado.",
+    accuracy: "—",
+    target: `${metaPrecisao}m`,
+    hint: "Isso pode levar alguns segundos."
   });
 
-  // inicia timers do fluxo
   iniciarEscalonamentoMeta();
   iniciarTimeoutMaximo();
 
-  // inicia rastreamento
   watchID = navigator.geolocation.watchPosition(
     (pos) => {
       ultimoLat = pos.coords.latitude;
@@ -307,27 +266,30 @@ function iniciarLocalizacao() {
       const temCoords = coordenadasValidas(ultimoLat, ultimoLon);
 
       if (!temCoords) {
-        atualizarLightbox({
-          titulo: "Buscando localização…",
-          linha1: "Obtendo coordenadas do dispositivo.",
-          linha2: `Meta: ${metaPrecisao}m`,
-          rodape: "Se estiver em ambiente fechado, a precisão pode ser limitada."
+        setTexto({
+          title: "Buscando localização…",
+          subtitle: "Obtendo coordenadas do dispositivo.",
+          accuracy: "—",
+          target: `${metaPrecisao}m`,
+          hint: "Se estiver em ambiente fechado, a precisão pode ser limitada."
         });
       } else {
-        atualizarLightbox({
-          titulo: "Aprimorando precisão…",
-          linha1: `Precisão atual: ${textoPrecisao(ultimaPrecisao)}`,
-          linha2: `Meta: ${metaPrecisao}m`,
-          rodape: botaoLiberado ? "Você já pode enviar sem meta de precisão." : "Aguardando uma leitura mais precisa."
+        setTexto({
+          title: "Aprimorando precisão…",
+          subtitle: botaoLiberado ? "Você já pode enviar manualmente." : "Aguardando uma leitura mais precisa.",
+          accuracy: fmtM(ultimaPrecisao),
+          target: `${metaPrecisao}m`,
+          hint: botaoLiberado ? "Se necessário, toque em “Enviar agora (sem meta)”." : "Isso pode levar alguns segundos."
         });
       }
 
-      // envio automático quando atingiu a meta
       if (ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
-        atualizarLightbox({
-          titulo: "Meta atingida ✅",
-          linha1: `Precisão: ${textoPrecisao(ultimaPrecisao)}`,
-          linha2: "Enviando alerta…"
+        setTexto({
+          title: "Meta atingida ✅",
+          subtitle: "Enviando alerta…",
+          accuracy: fmtM(ultimaPrecisao),
+          target: `${metaPrecisao}m`,
+          hint: ""
         });
 
         pararLocalizacao();
@@ -343,8 +305,20 @@ function iniciarLocalizacao() {
         err?.code === 3 ? "Tempo esgotado ao tentar obter a localização." :
         "Falha ao obter a localização.";
 
-      mostrarLightbox(`<b>Localização indisponível</b><br>${motivo}<br><br>Enviando alerta sem coordenadas…`);
+      // Mostra o lightbox novamente apenas para feedback rápido (opcional)
+      abrirLightbox();
+      mostrarBtnForcar(false);
+      setTexto({
+        title: "Localização indisponível",
+        subtitle: motivo,
+        accuracy: "—",
+        target: `${metaPrecisao}m`,
+        hint: "Enviando alerta sem coordenadas…"
+      });
+
       enviarMensagem(null, null, null, motivo);
+      // não precisa fechar imediatamente; se quiser, feche após 800ms:
+      setTimeout(() => fecharLightbox(), 800);
     },
     {
       enableHighAccuracy: true,
@@ -364,10 +338,19 @@ function enviarSemPrecisao() {
   }
 }
 
+function definirTipo(tipo) {
+  tipoEmergencia = tipo;
+}
+
 // ======================
-// INIT (exposto no window)
+// INIT
 // ======================
 export function init() {
+  // botão do HTML chama via listener (evita inline onclick)
+  const btn = dom.btnForcar();
+  if (btn) btn.addEventListener("click", enviarSemPrecisao);
+
+  // mantém compatibilidade com onclick existentes no HTML
   window.definirTipo = definirTipo;
   window.iniciarLocalizacao = iniciarLocalizacao;
   window.enviarSemPrecisao = enviarSemPrecisao;
