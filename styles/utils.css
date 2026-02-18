@@ -116,6 +116,10 @@ body {
                         color: var(--white);
                     }
                 }
+
+                &.is-hidden {
+                    display: none !important;
+                }
             }
 
             & p:last-child {
