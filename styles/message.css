@@ -156,8 +156,11 @@ body[data-page="message"] {
                 height: 34px;
                 border-radius: 50%;
                 border: 3px solid rgba(255,255,255,.2);
-                border-top-color: #fff;
-                animation: spin 1.05s linear infinite;
+                
+                &.spinning{
+                    border-top-color: #fff;
+                    animation: spin 1.05s linear infinite;
+                }
             }
         
             @keyframes spin {
@@ -241,7 +244,7 @@ body[data-page="message"] {
                 }
             }
 
-            & .is-hidden{
+            &.is-hidden{
                 display: none !important;
             }
         }

@@ -1,11 +1,18 @@
 /**
- * UniFacens SOS — message.js (versão limpa)
- * - Configurações foram para HTML/CSS
- * - JS apenas:
- *   1) liga/desliga lightbox
- *   2) atualiza textos (precisão/meta/status)
- *   3) controla timers e envio
- * - Sem "probe" e sem SMS
+ * UniFacens SOS — message.js (novo fluxo do Lightbox)
+ *
+ * Correções deste ajuste:
+ * 1) Volta a abrir WhatsApp automaticamente quando estiver pronto para enviar.
+ *    - Ainda mantém o botão "Abrir WhatsApp" como fallback caso pop-up seja bloqueado.
+ *
+ * 2) Quando o GPS/localização estava OFF e o usuário liga depois:
+ *    - Reinicia o watchPosition automaticamente (retry) para "pegar" a mudança sem refresh.
+ *
+ * Mantido:
+ * - Textos iniciais ficam no HTML
+ * - Botão "Enviar sem localização" aparece SEMPRE após 3s (independente do GPS)
+ * - Spinner inicia parado e recebe classe "spinning" ao confirmar coords
+ * - Best-only (não piora), meta 15m, +10m/2s, tentativa 10s
  */
 
 // ======================
@@ -14,10 +21,16 @@
 const NUMERO_DESTINO = "5515981144802";
 
 const META_INICIAL_M = 15;
-const TEMPO_JANELA_INICIAL_MS = 5000;
-const PASSO_RELAXAMENTO_M = 10;
-const PASSO_RELAXAMENTO_MS = 2000;
-const TEMPO_MAXIMO_MS = 20000;
+const AUMENTO_META_M = 10;
+const AUMENTO_META_MS = 2000;
+
+const ESPERA_COORDS_MS = 3000;     // botão "Enviar sem localização" após 3s
+const LIBERAR_MANUAL_MS = 3000;    // após confirmar coords, libera "Enviar sem precisão"
+const TENTATIVA_MAX_MS = 10000;    // após confirmar coords, tenta melhorar por no máximo 10s
+const TICK_MELHORIA_MS = 500;      // ciclo de atualização/checagem
+
+// Retry do watch quando GPS estava off e depois liga (PC costuma precisar)
+const RETRY_WATCH_MS = 2000;
 
 // ======================
 // STATE
@@ -25,96 +38,102 @@ const TEMPO_MAXIMO_MS = 20000;
 let watchID = null;
 
 let tipoEmergencia = "EMERGÊNCIA";
-let ultimoLat = null;
-let ultimoLon = null;
-let ultimaPrecisao = null;
-
-let metaPrecisao = META_INICIAL_M;
-let botaoLiberado = false;
 let enviouMensagem = false;
 
-let escalonadorID = null;
-let timeoutInicialID = null;
-let timeoutMaxID = null;
+let coordenadaConfirmada = false;
+
+let lastLat = null;
+let lastLon = null;
+let lastAcc = null;
+
+let bestLat = null;
+let bestLon = null;
+let bestAcc = null;
+
+let metaPrecisao = null;
+
+// timers/intervalos
+let tEsperaCoords = null;     // 3s
+let tLiberarManual = null;    // 3s
+let tMaxTentativa = null;     // 10s
+let iAumentarMeta = null;     // 2s
+let iTickMelhoria = null;     // 500ms
+
+// retry do watch
+let tRetryWatch = null;
+
+// WhatsApp URL final (para botão fallback)
+let waUrlPendente = null;
+let modoAbrirWhatsApp = false;
 
 // ======================
-// DOM (cache)
+// DOM
 // ======================
 const dom = {
   lightbox: () => document.getElementById("lightbox"),
   title: () => document.getElementById("lbTitle"),
   subtitle: () => document.getElementById("lbSubtitle"),
+  hint: () => document.getElementById("lbHint"),
   accuracy: () => document.getElementById("lbAccuracy"),
   target: () => document.getElementById("lbTarget"),
-  hint: () => document.getElementById("lbHint"),
   btnForcar: () => document.getElementById("btnForcar"),
+
+  spinner: () =>
+    document.getElementById("lbSpinner") ||
+    document.querySelector(".lb__spinner"),
 };
 
 // ======================
 // UI helpers
 // ======================
-function fmtM(value) {
-  return (value != null) ? `${Math.round(value)}m` : "—";
+function setText(el, value) {
+  if (el && value != null) el.textContent = value;
 }
 
-function abrirLightbox() {
+function openLightbox() {
   const lb = dom.lightbox();
   if (!lb) return;
   lb.classList.remove("is-hidden");
   lb.setAttribute("aria-busy", "true");
 }
 
-function fecharLightbox() {
+function closeLightbox() {
   const lb = dom.lightbox();
   if (!lb) return;
   lb.classList.add("is-hidden");
   lb.setAttribute("aria-busy", "false");
 }
 
-function setTexto({ title, subtitle, accuracy, target, hint }) {
-  const t = dom.title(); if (t && title != null) t.textContent = title;
-  const s = dom.subtitle(); if (s && subtitle != null) s.textContent = subtitle;
-  const a = dom.accuracy(); if (a && accuracy != null) a.textContent = accuracy;
-  const m = dom.target(); if (m && target != null) m.textContent = target;
-  const h = dom.hint(); if (h && hint != null) h.textContent = hint;
-}
-
-function mostrarBtnForcar(mostrar) {
+function hideBtn() {
   const btn = dom.btnForcar();
   if (!btn) return;
-  btn.classList.toggle("is-hidden", !mostrar);
+  btn.classList.add("is-hidden");
+}
+
+function showBtn() {
+  const btn = dom.btnForcar();
+  if (!btn) return;
+  btn.classList.remove("is-hidden");
+}
+
+function setBtnText(texto) {
+  const btn = dom.btnForcar();
+  if (!btn || texto == null) return;
+  btn.textContent = texto;
+}
+
+function fmtAcc(acc) {
+  return (acc != null) ? `${Math.round(acc)}m` : "—";
+}
+
+function iniciarSpinner() {
+  const sp = dom.spinner();
+  if (!sp) return;
+  sp.classList.add("spinning");
 }
 
 // ======================
-// timers / reset
-// ======================
-function limparTimers() {
-  if (timeoutInicialID) { clearTimeout(timeoutInicialID); timeoutInicialID = null; }
-  if (escalonadorID) { clearInterval(escalonadorID); escalonadorID = null; }
-  if (timeoutMaxID) { clearTimeout(timeoutMaxID); timeoutMaxID = null; }
-}
-
-function resetarEstado() {
-  ultimoLat = null;
-  ultimoLon = null;
-  ultimaPrecisao = null;
-
-  metaPrecisao = META_INICIAL_M;
-  botaoLiberado = false;
-  enviouMensagem = false;
-}
-
-function pararLocalizacao() {
-  if (watchID) {
-    navigator.geolocation.clearWatch(watchID);
-    watchID = null;
-  }
-  limparTimers();
-  fecharLightbox();
-}
-
-// ======================
-// link do mapa (GitHub Pages ok)
+// Coordenadas / Link (GitHub Pages ok)
 // ======================
 function coordenadasValidas(lat, lon) {
   const latNum = Number(lat);
@@ -140,185 +159,241 @@ function gerarLinkMapa(lat, lon) {
   return url.toString();
 }
 
-function obterTextoLinkMapa(lat, lon) {
+function textoLinkMapaOuNaoDisponivel(lat, lon) {
   return coordenadasValidas(lat, lon)
     ? gerarLinkMapa(Number(lat), Number(lon))
-    : "Não disponível";
+    : "Não disponível.";
+}
+
+function textoPrecisaoOuNaoDisponivel(lat, lon, acc) {
+  const temCoords = coordenadasValidas(lat, lon);
+  return (temCoords && acc != null)
+    ? `${Math.round(acc)} metros`
+    : "Não disponível.";
 }
 
 // ======================
-// WhatsApp
+// WhatsApp (auto + fallback botão)
 // ======================
-function enviarMensagem(lat, lon, accuracy, motivo = null) {
-  if (enviouMensagem) return;
-  enviouMensagem = true;
-
-  const link = obterTextoLinkMapa(lat, lon);
-  const prec = (accuracy != null) ? `${Math.round(accuracy)} metros` : "Não disponível";
-
-  const statusLocalizacao = (link !== "Não disponível")
-    ? "Localização obtida."
-    : (motivo ? `Localização indisponível: ${motivo}` : "Localização indisponível.");
+function montarUrlWhatsApp(lat, lon, accuracy) {
+  const link = textoLinkMapaOuNaoDisponivel(lat, lon);
+  const prec = textoPrecisaoOuNaoDisponivel(lat, lon, accuracy);
 
   const msg = [
     "PEDIDO DE AJUDA",
     "",
     `Tipo: ${tipoEmergencia}`,
     "",
-    `Status: ${statusLocalizacao}`,
-    "",
     `Precisão: ${prec}`,
     "",
     `Localização: ${link}`,
   ].join("\n");
 
-  const url = `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
+}
 
+function abrirWhatsApp(url) {
+  // mantém estratégia anterior: tenta nova aba; se bloquear, mesma aba
   const popup = window.open(url, "_blank");
   if (!popup) window.location.href = url;
 }
 
+/**
+ * Atualiza UI para "Localização obtida!" e botão "Abrir WhatsApp"
+ * e tenta abrir automaticamente.
+ */
+function tentarEnviarParaWhatsApp(urlFinal) {
+  if (enviouMensagem) return;
+  enviouMensagem = true;
+
+  waUrlPendente = urlFinal;
+  modoAbrirWhatsApp = true;
+
+  // Atualiza lightbox (como você pediu)
+  openLightbox();
+  setText(dom.title(), "Localização obtida!");
+  setText(dom.subtitle(), "");
+  setText(dom.hint(), "");
+
+  setBtnText("Abrir WhatsApp");
+  showBtn();
+
+  // ✅ tenta abrir automaticamente (e o botão fica como fallback se bloquear)
+  abrirWhatsApp(urlFinal);
+}
+
 // ======================
-// fluxo principal
+// Cleanup
 // ======================
-function iniciarTimeoutMaximo() {
-  timeoutMaxID = setTimeout(() => {
+function clearAllTimers() {
+  if (tEsperaCoords) { clearTimeout(tEsperaCoords); tEsperaCoords = null; }
+  if (tLiberarManual) { clearTimeout(tLiberarManual); tLiberarManual = null; }
+  if (tMaxTentativa) { clearTimeout(tMaxTentativa); tMaxTentativa = null; }
+  if (iAumentarMeta) { clearInterval(iAumentarMeta); iAumentarMeta = null; }
+  if (iTickMelhoria) { clearInterval(iTickMelhoria); iTickMelhoria = null; }
+  if (tRetryWatch) { clearTimeout(tRetryWatch); tRetryWatch = null; }
+}
+
+function stopWatch() {
+  if (watchID) {
+    navigator.geolocation.clearWatch(watchID);
+    watchID = null;
+  }
+}
+
+function resetState() {
+  enviouMensagem = false;
+  coordenadaConfirmada = false;
+
+  lastLat = null; lastLon = null; lastAcc = null;
+  bestLat = null; bestLon = null; bestAcc = null;
+
+  metaPrecisao = null;
+
+  waUrlPendente = null;
+  modoAbrirWhatsApp = false;
+}
+
+function stopAll() {
+  stopWatch();
+  clearAllTimers();
+}
+
+// ======================
+// Fluxo: confirmação e melhoria
+// ======================
+function aplicarSeMelhor(lat, lon, acc) {
+  if (!coordenadasValidas(lat, lon)) return false;
+  if (acc == null || !Number.isFinite(Number(acc))) return false;
+
+  if (bestAcc == null || acc < bestAcc) {
+    bestLat = lat;
+    bestLon = lon;
+    bestAcc = acc;
+    return true;
+  }
+  return false;
+}
+
+function iniciarTentativaAposConfirmacao() {
+  // após 3s: libera manual e muda texto do botão
+  tLiberarManual = setTimeout(() => {
+    if (enviouMensagem) return;
+    setText(dom.hint(), "Se a meta não for atingida, você ainda pode enviar manualmente.");
+    setBtnText("Enviar sem precisão");
+    showBtn();
+  }, LIBERAR_MANUAL_MS);
+
+  // aumenta meta a cada 2s
+  iAumentarMeta = setInterval(() => {
+    if (enviouMensagem) return;
+    metaPrecisao += AUMENTO_META_M;
+    setText(dom.target(), `${metaPrecisao}m`);
+  }, AUMENTO_META_MS);
+
+  // loop de melhoria a cada 500ms (sem piorar)
+  iTickMelhoria = setInterval(() => {
     if (enviouMensagem) return;
 
-    pararLocalizacao();
+    aplicarSeMelhor(lastLat, lastLon, lastAcc);
+    setText(dom.accuracy(), fmtAcc(bestAcc));
 
-    if (coordenadasValidas(ultimoLat, ultimoLon)) {
-      enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao, "Tempo máximo atingido.");
-    } else {
-      enviarMensagem(null, null, null, "Tempo máximo atingido e sem coordenadas.");
+    // meta atingida -> tenta enviar automaticamente
+    if (bestAcc != null && metaPrecisao != null && bestAcc <= metaPrecisao) {
+      stopAll();
+      const urlFinal = montarUrlWhatsApp(bestLat, bestLon, bestAcc);
+      tentarEnviarParaWhatsApp(urlFinal);
     }
-  }, TEMPO_MAXIMO_MS);
+  }, TICK_MELHORIA_MS);
+
+  // limite máximo de 10s para tentar melhorar
+  tMaxTentativa = setTimeout(() => {
+    if (enviouMensagem) return;
+
+    stopAll();
+
+    if (coordenadasValidas(bestLat, bestLon)) {
+      const urlFinal = montarUrlWhatsApp(bestLat, bestLon, bestAcc);
+      tentarEnviarParaWhatsApp(urlFinal);
+    } else {
+      const urlFinal = montarUrlWhatsApp(null, null, null);
+      tentarEnviarParaWhatsApp(urlFinal);
+    }
+  }, TENTATIVA_MAX_MS);
 }
 
-function liberarBotaoSemPrecisao() {
-  if (botaoLiberado) return;
-  botaoLiberado = true;
+function confirmarLocalizacaoSePossivel() {
+  if (coordenadaConfirmada) return;
 
-  mostrarBtnForcar(true);
-  setTexto({
-    hint: "Você já pode enviar sem meta de precisão."
-  });
-}
+  if (coordenadasValidas(lastLat, lastLon) && lastAcc != null) {
+    coordenadaConfirmada = true;
 
-function iniciarEscalonamentoMeta() {
-  timeoutInicialID = setTimeout(() => {
-    liberarBotaoSemPrecisao();
+    // cancela janela dos 3s (não vai mais mostrar "Enviar sem localização")
+    if (tEsperaCoords) { clearTimeout(tEsperaCoords); tEsperaCoords = null; }
 
-    escalonadorID = setInterval(() => {
-      metaPrecisao += PASSO_RELAXAMENTO_M;
+    // esconde botão ao confirmar coords
+    hideBtn();
 
-      setTexto({
-        title: "Aprimorando precisão…",
-        subtitle: "Tentando obter uma leitura mais precisa.",
-        accuracy: fmtM(ultimaPrecisao),
-        target: `${metaPrecisao}m`,
-        hint: "Se a meta não for atingida, você ainda pode enviar manualmente."
-      });
+    // inicia spinner girando ao confirmar coords
+    iniciarSpinner();
 
-      if (coordenadasValidas(ultimoLat, ultimoLon) && ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
-        setTexto({
-          title: "Meta atingida ✅",
-          subtitle: "Enviando alerta…"
-        });
+    // define meta e primeira melhor leitura
+    metaPrecisao = META_INICIAL_M;
+    bestLat = lastLat;
+    bestLon = lastLon;
+    bestAcc = lastAcc;
 
-        pararLocalizacao();
-        enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
-      }
-    }, PASSO_RELAXAMENTO_MS);
-  }, TEMPO_JANELA_INICIAL_MS);
-}
+    // começa a mostrar valores
+    setText(dom.accuracy(), fmtAcc(bestAcc));
+    setText(dom.target(), `${metaPrecisao}m`);
 
-function iniciarLocalizacao() {
-  if (!navigator.geolocation) {
-    enviarMensagem(null, null, null, "Geolocalização não suportada neste dispositivo.");
-    return;
+    // muda textos do estado "confirmou"
+    setText(dom.title(), "Aguarde, buscando localização…");
+    setText(dom.subtitle(), "Melhorando a precisão do GPS.");
+    setText(dom.hint(), "Isso pode levar alguns segundos.");
+
+    iniciarTentativaAposConfirmacao();
   }
+}
 
-  pararLocalizacao(); // encerra tentativa anterior (se houver)
-  resetarEstado();
-
-  abrirLightbox();
-  mostrarBtnForcar(false);
-
-  // Estado inicial no HTML (JS só confirma valores dinâmicos)
-  setTexto({
-    title: "Buscando localização…",
-    subtitle: "Ative o GPS e permita o acesso, se solicitado.",
-    accuracy: "—",
-    target: `${metaPrecisao}m`,
-    hint: "Isso pode levar alguns segundos."
-  });
-
-  iniciarEscalonamentoMeta();
-  iniciarTimeoutMaximo();
+// ======================
+// watchPosition com retry (para ligar GPS sem refresh)
+// ======================
+function startWatch() {
+  // evita múltiplos watchers
+  stopWatch();
 
   watchID = navigator.geolocation.watchPosition(
     (pos) => {
-      ultimoLat = pos.coords.latitude;
-      ultimoLon = pos.coords.longitude;
-      ultimaPrecisao = pos.coords.accuracy;
+      lastLat = pos.coords.latitude;
+      lastLon = pos.coords.longitude;
+      lastAcc = pos.coords.accuracy;
 
-      const temCoords = coordenadasValidas(ultimoLat, ultimoLon);
+      // se estava em retry, cancela
+      if (tRetryWatch) { clearTimeout(tRetryWatch); tRetryWatch = null; }
 
-      if (!temCoords) {
-        setTexto({
-          title: "Buscando localização…",
-          subtitle: "Obtendo coordenadas do dispositivo.",
-          accuracy: "—",
-          target: `${metaPrecisao}m`,
-          hint: "Se estiver em ambiente fechado, a precisão pode ser limitada."
-        });
-      } else {
-        setTexto({
-          title: "Aprimorando precisão…",
-          subtitle: botaoLiberado ? "Você já pode enviar manualmente." : "Aguardando uma leitura mais precisa.",
-          accuracy: fmtM(ultimaPrecisao),
-          target: `${metaPrecisao}m`,
-          hint: botaoLiberado ? "Se necessário, toque em “Enviar agora (sem meta)”." : "Isso pode levar alguns segundos."
-        });
-      }
-
-      if (ultimaPrecisao != null && ultimaPrecisao <= metaPrecisao) {
-        setTexto({
-          title: "Meta atingida ✅",
-          subtitle: "Enviando alerta…",
-          accuracy: fmtM(ultimaPrecisao),
-          target: `${metaPrecisao}m`,
-          hint: ""
-        });
-
-        pararLocalizacao();
-        enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao);
-      }
+      confirmarLocalizacaoSePossivel();
     },
     (err) => {
-      pararLocalizacao();
+      // Não mostra botão imediatamente; botão segue a regra dos 3s.
 
       const motivo =
         err?.code === 1 ? "Permissão de localização negada." :
-        err?.code === 2 ? "Não foi possível obter o GPS (sinal fraco/indisponível)." :
+        err?.code === 2 ? "Localização indisponível. Ative o GPS/localização." :
         err?.code === 3 ? "Tempo esgotado ao tentar obter a localização." :
         "Falha ao obter a localização.";
 
-      // Mostra o lightbox novamente apenas para feedback rápido (opcional)
-      abrirLightbox();
-      mostrarBtnForcar(false);
-      setTexto({
-        title: "Localização indisponível",
-        subtitle: motivo,
-        accuracy: "—",
-        target: `${metaPrecisao}m`,
-        hint: "Enviando alerta sem coordenadas…"
-      });
+      setText(dom.hint(), motivo);
 
-      enviarMensagem(null, null, null, motivo);
-      // não precisa fechar imediatamente; se quiser, feche após 800ms:
-      setTimeout(() => fecharLightbox(), 800);
+      // ✅ Se não é permissão negada (code 1), faz retry automático para pegar quando o usuário ligar o GPS
+      if (!coordenadaConfirmada && !enviouMensagem && err?.code !== 1) {
+        if (!tRetryWatch) {
+          tRetryWatch = setTimeout(() => {
+            tRetryWatch = null;
+            if (!coordenadaConfirmada && !enviouMensagem) startWatch();
+          }, RETRY_WATCH_MS);
+        }
+      }
     },
     {
       enableHighAccuracy: true,
@@ -328,14 +403,36 @@ function iniciarLocalizacao() {
   );
 }
 
-function enviarSemPrecisao() {
-  pararLocalizacao();
-
-  if (coordenadasValidas(ultimoLat, ultimoLon)) {
-    enviarMensagem(ultimoLat, ultimoLon, ultimaPrecisao, "Envio manual sem meta de precisão.");
-  } else {
-    enviarMensagem(null, null, null, "Envio manual sem coordenadas.");
+// ======================
+// Entrada principal
+// ======================
+function iniciarLocalizacao() {
+  if (!navigator.geolocation) {
+    const urlFinal = montarUrlWhatsApp(null, null, null);
+    tentarEnviarParaWhatsApp(urlFinal);
+    return;
   }
+
+  stopAll();
+  resetState();
+
+  openLightbox();
+
+  // valores dinâmicos
+  setText(dom.accuracy(), "—");
+  setText(dom.target(), "—");
+
+  // botão começa oculto (texto já está no HTML)
+  hideBtn();
+
+  // SEMPRE após 3s mostra "Enviar sem localização" se não confirmar coords
+  tEsperaCoords = setTimeout(() => {
+    if (enviouMensagem) return;
+    if (!coordenadaConfirmada) showBtn();
+  }, ESPERA_COORDS_MS);
+
+  // inicia watch (com retry automático)
+  startWatch();
 }
 
 function definirTipo(tipo) {
@@ -343,15 +440,49 @@ function definirTipo(tipo) {
 }
 
 // ======================
+// Botão: 3 modos
+// - "Abrir WhatsApp" (fallback/confirm)
+/// - "Enviar sem localização" (não confirmado)
+/// - "Enviar sem precisão" (confirmado, mas usuário quer enviar já)
+// ======================
+function onBtnClick() {
+  // Modo "Abrir WhatsApp"
+  if (modoAbrirWhatsApp && waUrlPendente) {
+    closeLightbox();
+    abrirWhatsApp(waUrlPendente);
+    return;
+  }
+
+  // Se ainda não confirmou: enviar sem localização -> tenta abrir automaticamente
+  if (!coordenadaConfirmada) {
+    stopAll();
+    const urlFinal = montarUrlWhatsApp(null, null, null);
+    tentarEnviarParaWhatsApp(urlFinal);
+    return;
+  }
+
+  // Se já confirmou: enviar melhor leitura (sem exigir meta) -> tenta abrir automaticamente
+  stopAll();
+
+  if (coordenadasValidas(bestLat, bestLon)) {
+    const urlFinal = montarUrlWhatsApp(bestLat, bestLon, bestAcc);
+    tentarEnviarParaWhatsApp(urlFinal);
+  } else {
+    const urlFinal = montarUrlWhatsApp(null, null, null);
+    tentarEnviarParaWhatsApp(urlFinal);
+  }
+}
+
+// ======================
 // INIT
 // ======================
 export function init() {
-  // botão do HTML chama via listener (evita inline onclick)
   const btn = dom.btnForcar();
-  if (btn) btn.addEventListener("click", enviarSemPrecisao);
+  if (btn) {
+    btn.classList.add("is-hidden");
+    btn.addEventListener("click", onBtnClick);
+  }
 
-  // mantém compatibilidade com onclick existentes no HTML
   window.definirTipo = definirTipo;
   window.iniciarLocalizacao = iniciarLocalizacao;
-  window.enviarSemPrecisao = enviarSemPrecisao;
 }
