@@ -18,7 +18,7 @@
 // ======================
 // CONFIG
 // ======================
-const NUMERO_DESTINO = "5515981144802";
+const NUMERO_DESTINO = "5515991966412";
 
 const META_INICIAL_M = 15;
 const AUMENTO_META_M = 10;
