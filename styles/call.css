@@ -4,70 +4,81 @@ body[data-page="call"] {
 
         & main {
 
-            & .btn {
-    
-                &#gatehouse {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
-        
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
-                        & img#normal {
-                            opacity: 0;
-                        }
-            
-                        & img#hover {
-                            opacity: 1;
-                        }
-                    }
-                }
-    
-                &#clinic {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
-        
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
-                        & img#normal {
-                            opacity: 0;
-                        }
-            
-                        & img#hover {
-                            opacity: 1;
-                        }
-                    }
-                }
+            & .grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;               
 
-                &#occupational-safety {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
+                & .btn {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: max-content 1fr;
+                    justify-items: center;
+                    gap: 1rem;
+                    min-height: 11rem;
         
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
+                    &#gatehouse {
+        
                         & img#normal {
-                            opacity: 0;
+                            opacity: 1;
                         }
             
                         & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
+        
+                    &#clinic {
+        
+                        & img#normal {
                             opacity: 1;
+                        }
+            
+                        & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
+
+                    &#occupational-safety {
+        
+                        & img#normal {
+                            opacity: 1;
+                        }
+            
+                        & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
                         }
                     }
                 }

@@ -4,103 +4,110 @@ body[data-page="message"] {
 
         & main {
 
+            & p:first-child{
+                margin-inline: auto;
+                border-top: 1px solid var(--red);
+                border-bottom: 1px solid var(--red);
+                padding-block: 8px;
+            }
+
             & .grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
-            }
-
-            & .btn {
-                grid-template-columns: 1fr;
-                grid-template-rows: max-content 1fr;
-                justify-items: center;
-                gap: 1rem;
-                min-height: 11rem;
-    
-                &#first-aid {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
-        
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
-                        & img#normal {
-                            opacity: 0;
-                        }
-            
-                        & img#hover {
-                            opacity: 1;
-                        }
-                    }
-                }
-    
-                &#fire {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
-        
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
-                        & img#normal {
-                            opacity: 0;
-                        }
-            
-                        & img#hover {
-                            opacity: 1;
-                        }
-                    }
-                }
-
-                &#risk {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
-        
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
-                        & img#normal {
-                            opacity: 0;
-                        }
-            
-                        & img#hover {
-                            opacity: 1;
-                        }
-                    }
-                }
                 
-                &#other {
-    
-                    & img#normal {
-                        opacity: 1;
-                    }
+                & .btn {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: max-content 1fr;
+                    justify-items: center;
+                    gap: 1rem;
+                    min-height: 11rem;
         
-                    & img#hover {
-                        opacity: 0;
-                    }
-    
-                    &:hover {
-            
+                    &#first-aid {
+        
                         & img#normal {
-                            opacity: 0;
+                            opacity: 1;
                         }
             
                         & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
+        
+                    &#fire {
+        
+                        & img#normal {
                             opacity: 1;
+                        }
+            
+                        & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
+    
+                    &#risk {
+        
+                        & img#normal {
+                            opacity: 1;
+                        }
+            
+                        & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
+                    
+                    &#other {
+        
+                        & img#normal {
+                            opacity: 1;
+                        }
+            
+                        & img#hover {
+                            opacity: 0;
+                        }
+        
+                        &:hover {
+                
+                            & img#normal {
+                                opacity: 0;
+                            }
+                
+                            & img#hover {
+                                opacity: 1;
+                            }
                         }
                     }
                 }

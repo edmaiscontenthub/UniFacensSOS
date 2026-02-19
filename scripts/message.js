@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UniFacens SOS — message.js (novo fluxo do Lightbox)
  *
  * Correções deste ajuste:
@@ -18,7 +18,17 @@
 // ======================
 // CONFIG
 // ======================
-const NUMERO_DESTINO = "5515991966412";
+const NUMERO_DESTINO_PADRAO = "5515991966412";
+const DESTINO_CONFIG_POR_TIPO = {
+  "PRIMEIROS SOCORROS": {
+    numero: "5515981403334",
+    diasDesabilitados: [1, 7], // 1=domingo, 7=sabado
+  },
+  // "INCÊNDIO": {
+  //   numero: "5515991966412",
+  //   diasDesabilitados: [],
+  // },
+};
 
 const META_INICIAL_M = 15;
 const AUMENTO_META_M = 10;
@@ -176,6 +186,7 @@ function textoPrecisaoOuNaoDisponivel(lat, lon, acc) {
 // WhatsApp (auto + fallback botão)
 // ======================
 function montarUrlWhatsApp(lat, lon, accuracy) {
+  const numeroDestino = obterNumeroDestinoPorTipo(tipoEmergencia);
   const link = textoLinkMapaOuNaoDisponivel(lat, lon);
   const prec = textoPrecisaoOuNaoDisponivel(lat, lon, accuracy);
 
@@ -189,7 +200,57 @@ function montarUrlWhatsApp(lat, lon, accuracy) {
     `Localização: ${link}`,
   ].join("\n");
 
-  return `https://wa.me/${NUMERO_DESTINO}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/${numeroDestino}?text=${encodeURIComponent(msg)}`;
+}
+
+function normalizarTipo(tipo) {
+  return String(tipo || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase();
+}
+
+const DESTINO_CONFIG_NORMALIZADO_POR_TIPO = Object.fromEntries(
+  Object.entries(DESTINO_CONFIG_POR_TIPO).map(([tipo, config]) => [
+    normalizarTipo(tipo),
+    config,
+  ])
+);
+
+function getWeekdaySaoPaulo(date = new Date()) {
+  const weekdayName = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+  }).format(date);
+
+  const weekdayNormalized = String(weekdayName || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  const map = {
+    "domingo": 1,
+    "segunda-feira": 2,
+    "terca-feira": 3,
+    "quarta-feira": 4,
+    "quinta-feira": 5,
+    "sexta-feira": 6,
+    "sabado": 7,
+  };
+
+  return map[weekdayNormalized];
+}
+
+function obterNumeroDestinoPorTipo(tipo) {
+  const tipoNormalizado = normalizarTipo(tipo);
+  const config = DESTINO_CONFIG_NORMALIZADO_POR_TIPO[tipoNormalizado];
+  if (!config?.numero) return NUMERO_DESTINO_PADRAO;
+  const diaAtual = getWeekdaySaoPaulo();
+  if (config.diasDesabilitados?.includes(diaAtual)) {
+    return NUMERO_DESTINO_PADRAO;
+  }
+  return config.numero;
 }
 
 function abrirWhatsApp(url) {
@@ -217,7 +278,6 @@ function tentarEnviarParaWhatsApp(urlFinal) {
 
   setBtnText("Abrir WhatsApp");
   showBtn();
-
   // ✅ tenta abrir automaticamente (e o botão fica como fallback se bloquear)
   abrirWhatsApp(urlFinal);
 }
@@ -384,7 +444,6 @@ function startWatch() {
         "Falha ao obter a localização.";
 
       setText(dom.hint(), motivo);
-
       // ✅ Se não é permissão negada (code 1), faz retry automático para pegar quando o usuário ligar o GPS
       if (!coordenadaConfirmada && !enviouMensagem && err?.code !== 1) {
         if (!tRetryWatch) {
