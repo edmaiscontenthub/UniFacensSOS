@@ -131,6 +131,10 @@ body {
         }
 
         & footer{
+            display: flex;
+            flex-direction: column;
+            gap: .25rem;
+
             & p {
                 font-size: .6rem;
                 color: var(--gray);
