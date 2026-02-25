@@ -70,14 +70,16 @@ O canal de ligações continua funcional via `tel:`. O canal de mensagens depend
 #### Android (Google Chrome)
 
 1. Abra o app no Chrome.
-2. Menu (⋮).
-3. **Adicionar à tela inicial** (ou **Instalar app**).
+2. Menu ( ⋮ ).
+3. **Adicionar à tela inicial**.
+4. Toque em **Instalar** para confirmar.
 
 #### iOS (Safari)
 
 1. Abra o app no Safari.
-2. **Compartilhar**.
-3. **Adicionar à Tela de Início**.
+2. Toque no botão de menu **Compartilhar** (ícone de quadrado com seta para cima, na barra inferior/superior).
+3. No menu de compartilhamento, toque em **Adicionar à Tela de Início**.
+4. Toque em **Adicionar** para confirmar.
 
 ---
 
@@ -88,37 +90,43 @@ Estrutura organizada em módulos HTML, CSS e JavaScript:
 ```
 unifacens-sos/
 │
-├── index.html                 # Ponto de entrada da aplicação (carrega o sistema modular)
+├── index.html           # Ponto de entrada da aplicação
+├── manifest.json        # Manifesto PWA (instalação do app)
+├── service-worker.js    # Service Worker (offline e atualizações)
 │
-├── pages/                     # Páginas funcionais do app
-│   ├── home.html              # Tela inicial
-│   ├── call.html              # Canal de ligações por setor
-│   ├── message.html           # Envio de mensagem com localização por categoria
-│   └── map.html               # Visualização da localização no mapa
-│
-├── styles/                    # Arquivos de estilo (CSS modular)
+├── pages/               # Páginas funcionais do app
 │   │
-│   ├── app.css                # Inicializador de estilos
-│   ├── global.css             # Estilos globais
-│   ├── utils.css              # Classes utilitárias
-│   ├── home.css               # Estilos da home
-│   ├── call.css               # Estilos da página de ligações
-│   ├── message.css            # Estilos da página de mensagens
-│   └── map.css                # Estilos da página de mapa
+│   ├── home.html        # Tela inicial
+│   ├── call.html        # Canal de ligações por setor
+│   ├── message.html     # Envio de mensagem com localização
+│   └── map.html         # Visualização da localização no mapa
 │
-├── scripts/                   # Módulos JavaScript (ES Modules)
-│   ├── app.js                 # Inicializador principal (roteamento dinâmico)
-│   ├── utils.js               # Funções utilitárias globais
-│   ├── home.js                # Lógica da home
-│   ├── call.js                # Lógica do canal de ligações
-│   ├── message.js             # Lógica de localização e envio WhatsApp
-│   └── map.js                 # Renderização do Google Maps
+├── styles/              # Arquivos de estilo
+│   │
+│   ├── app.css          # Inicializador de estilos
+│   ├── global.css       # Estilos globais
+│   ├── utils.css        # Classes utilitárias
+│   ├── home.css         # Estilos da home
+│   ├── call.css         # Estilos da página de ligações
+│   ├── message.css      # Estilos da página de mensagens
+│   └── map.css          # Estilos da página de mapa
 │
-├── assets/                    # Recursos estáticos
-│   └── images/                # Imagens do projeto
+├── scripts/             # Módulos JavaScript
+│   │
+│   ├── app.js           # Inicializador de scripts
+│   ├── utils.js         # Funções utilitárias globais
+│   ├── home.js          # Lógica da home
+│   ├── call.js          # Lógica do canal de ligações
+│   ├── message.js       # Lógica de localização e envio WhatsApp
+│   └── map.js           # Renderização do Google Maps
 │
-├── README.md                  # Documentação do projeto
-└── LICENSE.md                 # Licença institucional
+├── assets/              # Recursos estáticos
+│   │
+│   ├── images/          # Imagens do projeto
+│   └── icons/           # Ícones do PWA
+│
+├── README.md            # Documentação do projeto
+└── LICENSE.md           # Licença institucional
 ```
 
 ---
