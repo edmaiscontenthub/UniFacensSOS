@@ -18,6 +18,11 @@ font-family: "Reddit Sans Condensed", Arial, sans-serif;
   --gray: #9d9d9c;
 }
 
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
 a {
     text-decoration: none;
     color: inherit;
