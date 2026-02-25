@@ -205,8 +205,12 @@ body[data-page="message"] {
         align-items: center;
         justify-content: space-between;
         padding: 10px 0;
-        border-top: 1px solid rgba(255,255,255,.06);
+        border-block: 1px solid rgba(255,255,255,.06);
         /* & .lb__row:first-child { border-top: none; } */
+
+        &.lb__row:first-of-type {
+            border-bottom: none;
+        }
     
         & .lb__label{
             color: #bbb;
