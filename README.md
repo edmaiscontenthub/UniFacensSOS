@@ -1,4 +1,4 @@
-# 🚨 UniFacens SOS
+﻿# 🚨 UniFacens SOS
 
 Aplicação web desenvolvida para atendimento rápido de ocorrências institucionais por meio de dois canais principais:
 
@@ -50,6 +50,34 @@ Na página `message.html`, o usuário seleciona a categoria de emergência e o s
 ### 🗺️ Visualização de Mapa
 
 A página `map.html` recebe latitude e longitude via query string e renderiza o mapa em visão de satélite com o Google Maps incorporado.
+
+---
+
+## 📱 Aplicação Web (PWA)
+
+O UniFacens SOS funciona como aplicativo instalável (PWA), com abertura em modo standalone quando suportado e cache do app shell para carregamento rápido.
+
+### 🔄 Atualização em cache
+
+Quando `service-worker.js` muda (ex.: nova `CACHE_VERSION`), o navegador instala a nova versão, remove o cache antigo no `activate` e recarrega o app ao assumir o novo Service Worker.
+
+### 📶 Funcionamento offline
+
+O canal de ligações continua funcional via `tel:`. O canal de mensagens depende de internet (WhatsApp + envio de localização) e, sem conexão, o app orienta o usuário a usar ligação.
+
+### 📲 Instalação
+
+#### Android (Google Chrome)
+
+1. Abra o app no Chrome.
+2. Menu (⋮).
+3. **Adicionar à tela inicial** (ou **Instalar app**).
+
+#### iOS (Safari)
+
+1. Abra o app no Safari.
+2. **Compartilhar**.
+3. **Adicionar à Tela de Início**.
 
 ---
 
