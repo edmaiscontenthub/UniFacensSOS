@@ -1,4 +1,4 @@
-const CACHE_VERSION = "unifacens-sos-v3";
+const CACHE_VERSION = "unifacens-sos-v2"; // Atualize este valor para forçar atualização do cache (ex.: "unifacens-sos-v2").
 const CACHE_PREFIX = "unifacens-sos-";
 const CACHE_NAME = CACHE_VERSION;
 

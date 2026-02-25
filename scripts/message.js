@@ -30,14 +30,14 @@ const DESTINO_CONFIG_POR_TIPO = {
   // },
 };
 
-const META_INICIAL_M = 15;
-const AUMENTO_META_M = 10;
-const AUMENTO_META_MS = 2000;
+const META_INICIAL_M = 5; // meta começa em 5m
+const AUMENTO_META_M = 5; // meta aumenta 5m
+const AUMENTO_META_MS = 2000; // meta aumenta a cada 2s
 
 const ESPERA_COORDS_MS = 3000;     // botão "Enviar sem localização" após 3s
-const LIBERAR_MANUAL_MS = 3000;    // após confirmar coords, libera "Enviar sem precisão"
+const LIBERAR_MANUAL_MS = 3000;    // após confirmar coords, libera "Enviar sem precisão" após 3s
 const TENTATIVA_MAX_MS = 10000;    // após confirmar coords, tenta melhorar por no máximo 10s
-const TICK_MELHORIA_MS = 500;      // ciclo de atualização/checagem
+const TICK_MELHORIA_MS = 500;      // ciclo de atualização/checagem de melhoria a cada 500ms
 
 // Retry do watch quando GPS estava off e depois liga (PC costuma precisar)
 const RETRY_WATCH_MS = 2000;
@@ -272,7 +272,7 @@ function tentarEnviarParaWhatsApp(urlFinal) {
 
   // Atualiza lightbox (como você pediu)
   openLightbox();
-  setText(dom.title(), "Localização obtida!");
+  setText(dom.title(), "Pronto!");
   setText(dom.subtitle(), "");
   setText(dom.hint(), "");
 
