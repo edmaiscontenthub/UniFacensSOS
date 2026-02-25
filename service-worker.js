@@ -58,7 +58,8 @@ const APP_SHELL_PATHS = [
   "assets/images/other-hover.svg",
   "assets/images/edmais-logo.svg",
 
-  "assets/icons/icon.svg"
+  "assets/icons/icon.svg",
+  "assets/icons/apple-touch-icon-180.png"
 ];
 
 const APP_SHELL_URLS = APP_SHELL_PATHS.map(toScopedUrl);
