@@ -6,7 +6,7 @@ body {
 
     & .container{
         width: 100%;
-        min-height: 100dvh;
+        min-height: 100svh;
         max-width: 26rem;
         margin-inline: auto;
         padding: 1.5rem 1rem;
