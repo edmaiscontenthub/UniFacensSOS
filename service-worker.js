@@ -1,8 +1,8 @@
-const CACHE_VERSION = "unifacens-sos-v2"; // Atualize este valor para forçar atualização do cache (ex.: "unifacens-sos-v2").
+const CACHE_VERSION = "unifacens-sos-v3"; // Atualize este valor para forcar atualizacao do cache.
 const CACHE_PREFIX = "unifacens-sos-";
 const CACHE_NAME = CACHE_VERSION;
 
-// Usa o scope real do SW para funcionar em "/" e também em subpastas (GitHub Pages).
+// Usa o scope real do SW para funcionar em "/" e tambem em subpastas (GitHub Pages).
 const SCOPE_URL = new URL(self.registration.scope);
 const BASE_PATH = SCOPE_URL.pathname.endsWith("/") ? SCOPE_URL.pathname : `${SCOPE_URL.pathname}/`;
 
@@ -20,13 +20,12 @@ const APP_SHELL_PATHS = [
   "pages/message.html",
   "pages/map.html",
 
-  "styles/app.css",
   "styles/global.css",
+  "styles/utils.css",
   "styles/home.css",
   "styles/call.css",
   "styles/message.css",
   "styles/map.css",
-  "styles/utils.css",
 
   "scripts/app.js",
   "scripts/home.js",
@@ -96,8 +95,8 @@ async function handleNavigation(request) {
   if (safeCachedResponse) return safeCachedResponse;
 
   try {
-    // Em alguns hosts (ex.: Cloudflare), navegações podem responder com redirect HTTP.
-    // Forçamos redirect=follow para não retornar opaqueredirect ao navegador.
+    // Em alguns hosts (ex.: Cloudflare), navegacoes podem responder com redirect HTTP.
+    // Forcamos redirect=follow para nao retornar opaqueredirect ao navegador.
     const networkResponse = await fetch(request.url, { redirect: "follow" });
     const safeNetworkResponse = await toSafeNavigationResponse(networkResponse);
     if (safeNetworkResponse && safeNetworkResponse.ok) {
@@ -178,10 +177,10 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Não interfere em recursos externos (ex.: Google Fonts).
+  // Nao interfere em recursos externos (ex.: Google Fonts).
   if (url.origin !== self.location.origin) return;
 
-  // Restringe atuação ao mesmo base path do app.
+  // Restringe atuacao ao mesmo base path do app.
   if (!url.pathname.startsWith(BASE_PATH)) return;
 
   if (request.mode === "navigate") {

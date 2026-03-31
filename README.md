@@ -103,7 +103,6 @@ unifacens-sos/
 │
 ├── styles/              # Arquivos de estilo
 │   │
-│   ├── app.css          # Inicializador de estilos
 │   ├── global.css       # Estilos globais
 │   ├── utils.css        # Classes utilitárias
 │   ├── home.css         # Estilos da home
@@ -128,46 +127,6 @@ unifacens-sos/
 ├── README.md            # Documentação do projeto
 └── LICENSE.md           # Licença institucional
 ```
-
----
-
-## 🔁 Sistema Modular
-
-O projeto utiliza arquitetura modular baseada em ES Modules.
-
-### Inicialização HTML
-
-`index.html` atua como ponto de entrada do aplicativo.
-
-### Inicialização CSS
-
-`app.css` é responsável por carregar os estilos base e organizar os módulos de estilo.
-
-### Inicialização JavaScript
-
-`app.js` identifica a página ativa e importa dinamicamente o módulo correspondente:
-
-```javascript
-const routes = {
-  'home.html': () => import('./home.js'),
-  'call.html': () => import('./call.js'),
-  'message.html': () => import('./message.js'),
-  'map.html': () => import('./map.js'),
-};
-```
-
-Cada módulo exporta:
-
-```javascript
-export function init() {}
-```
-
-Esse padrão garante:
-
-- Separação de responsabilidades
-- Melhor manutenção
-- Escalabilidade futura
-- Organização clara por página
 
 ---
 

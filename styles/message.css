@@ -1,268 +1,223 @@
-body[data-page="message"] {
-
-    & .container {
-
-        & main {
-
-            & p:first-child{
-                margin-inline: auto;
-                border-top: 1px solid var(--red);
-                border-bottom: 1px solid var(--red);
-                padding-block: 8px;
-            }
-
-            & .grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-                
-                & .btn {
-                    grid-template-columns: 1fr;
-                    grid-template-rows: max-content 1fr;
-                    justify-items: center;
-                    gap: 1rem;
-                    min-height: 11rem;
-        
-                    &#first-aid {
-        
-                        & img#normal {
-                            opacity: 1;
-                        }
-            
-                        & img#hover {
-                            opacity: 0;
-                        }
-        
-                        &:hover {
-                
-                            & img#normal {
-                                opacity: 0;
-                            }
-                
-                            & img#hover {
-                                opacity: 1;
-                            }
-                        }
-                    }
-        
-                    &#fire {
-        
-                        & img#normal {
-                            opacity: 1;
-                        }
-            
-                        & img#hover {
-                            opacity: 0;
-                        }
-        
-                        &:hover {
-                
-                            & img#normal {
-                                opacity: 0;
-                            }
-                
-                            & img#hover {
-                                opacity: 1;
-                            }
-                        }
-                    }
-    
-                    &#risk {
-        
-                        & img#normal {
-                            opacity: 1;
-                        }
-            
-                        & img#hover {
-                            opacity: 0;
-                        }
-        
-                        &:hover {
-                
-                            & img#normal {
-                                opacity: 0;
-                            }
-                
-                            & img#hover {
-                                opacity: 1;
-                            }
-                        }
-                    }
-                    
-                    &#other {
-        
-                        & img#normal {
-                            opacity: 1;
-                        }
-            
-                        & img#hover {
-                            opacity: 0;
-                        }
-        
-                        &:hover {
-                
-                            & img#normal {
-                                opacity: 0;
-                            }
-                
-                            & img#hover {
-                                opacity: 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /* ==============================
-    LIGHTBOX — UniFacens SOS
-    ============================== */
-
-    & .lb {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 18px;
-        background: rgba(0,0,0,.92);
-        backdrop-filter: blur(4px);
-        z-index: 9999;
-
-        &.is-hidden {
-            display: none;
-        }
-
-        & .lb__card{
-            width: 100%;
-            max-width: 420px;
-            background: #111;
-            background-color: var(--black);
-            border: 1px solid rgba(255,255,255,.06);
-            border-radius: 16px;
-            padding: 20px 18px;
-            box-shadow: 0 0 40px rgba(0,0,0,.6);
-            animation: lbIn .22s ease;
-        }
-
-        @keyframes lbIn {
-            from { opacity: 0; transform: scale(.97); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        & .lb__header{
-            display: grid;
-            grid-template-columns: 34px 1fr;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 14px;
-
-            & .lb__spinner{
-                width: 34px;
-                height: 34px;
-                border-radius: 50%;
-                border: 3px solid rgba(255,255,255,.2);
-                
-                &.spinning{
-                    border-top-color: #fff;
-                    animation: spin 1.05s linear infinite;
-                }
-            }
-        
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-
-            & .lb__titles {
-
-                & .lb__title{
-                    font-weight: 700;
-                    font-size: 16px;
-                    color: #fff;
-                    line-height: 1.2;
-                }
-            
-                & .lb__subtitle{
-                    margin-top: 2px;
-                    font-size: 13px;
-                    color: #bbb;
-                    line-height: 1.35;
-                }
-
-            }
-        }
-
-        & .lb__body{
-            padding: 10px 0 6px;
-        }
-    }
-
-
-
-    & .lb__row{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-block: 1px solid rgba(255,255,255,.06);
-        /* & .lb__row:first-child { border-top: none; } */
-
-        &.lb__row:first-of-type {
-            border-bottom: none;
-        }
-    
-        & .lb__label{
-            color: #bbb;
-            font-size: 13px;
-        }
-    
-        & .lb__value{
-            color: #fff;
-            font-weight: 700;
-            font-size: 14px;
-        }
-    }
-
-    & .lb__hint{
-        margin-top: 10px;
-        font-size: 12px;
-        color: rgba(255,255,255,.75);
-    }
-
-
-
-    & .lb__actions{
-        margin-top: 14px;
-
-        & .btn{
-            width: 100%;
-            padding: 12px 14px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform .12s ease, background .12s ease;
-
-            &:active{ transform: scale(.99); }
-        
-            &.btn--danger{
-                background: #e53935;
-                color: #fff;
-    
-                &:hover{
-                    background: #c62828;
-                }
-            }
-
-            &.is-hidden{
-                display: none !important;
-            }
-        }
-    }
+body[data-page="message"] .container main p:first-child {
+    margin-inline: auto;
+    border-top: 1px solid var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-block: 8px;
 }
 
-@media (max-width: 480px){
-    .lb__card{ padding: 18px 16px; }
-    .lb__title{ font-size: 15px; }
+body[data-page="message"] .container main .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+body[data-page="message"] .container main .grid .btn {
+    grid-template-columns: 1fr;
+    grid-template-rows: max-content 1fr;
+    justify-items: center;
+    gap: 1rem;
+    min-height: 11rem;
+}
+
+body[data-page="message"] .container main .grid .btn#first-aid img#normal {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#first-aid img#hover {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#first-aid:hover img#normal {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#first-aid:hover img#hover {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#fire img#normal {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#fire img#hover {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#fire:hover img#normal {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#fire:hover img#hover {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#risk img#normal {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#risk img#hover {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#risk:hover img#normal {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#risk:hover img#hover {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#other img#normal {
+    opacity: 1;
+}
+
+body[data-page="message"] .container main .grid .btn#other img#hover {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#other:hover img#normal {
+    opacity: 0;
+}
+
+body[data-page="message"] .container main .grid .btn#other:hover img#hover {
+    opacity: 1;
+}
+
+body[data-page="message"] .lb {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, .94);
+    z-index: 9999;
+}
+
+body[data-page="message"] .lb.is-hidden {
+    display: none;
+}
+
+body[data-page="message"] .lb .lb__card {
+    width: 100%;
+    max-width: 420px;
+    background: #111;
+    background-color: var(--black);
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: 16px;
+    padding: 20px 18px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, .6);
+    animation: lbIn .22s ease;
+}
+
+body[data-page="message"] .lb .lb__header {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+body[data-page="message"] .lb .lb__header .lb__spinner {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, .2);
+}
+
+body[data-page="message"] .lb .lb__header .lb__spinner.spinning {
+    border-top-color: #fff;
+    animation: spin 1.05s linear infinite;
+}
+
+body[data-page="message"] .lb .lb__header .lb__titles .lb__title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    line-height: 1.2;
+}
+
+body[data-page="message"] .lb .lb__header .lb__titles .lb__subtitle {
+    margin-top: 2px;
+    font-size: 13px;
+    color: #bbb;
+    line-height: 1.35;
+}
+
+body[data-page="message"] .lb .lb__body {
+    padding: 10px 0 6px;
+}
+
+body[data-page="message"] .lb__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-block: 1px solid rgba(255, 255, 255, .06);
+}
+
+body[data-page="message"] .lb__row.lb__row:first-of-type {
+    border-bottom: none;
+}
+
+body[data-page="message"] .lb__row .lb__label {
+    color: #bbb;
+    font-size: 13px;
+}
+
+body[data-page="message"] .lb__row .lb__value {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+body[data-page="message"] .lb__hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, .75);
+}
+
+body[data-page="message"] .lb__actions {
+    margin-top: 14px;
+}
+
+body[data-page="message"] .lb__actions .btn {
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease;
+}
+
+body[data-page="message"] .lb__actions .btn:active {
+    transform: scale(.99);
+}
+
+body[data-page="message"] .lb__actions .btn.btn--danger {
+    background: #e53935;
+    color: #fff;
+}
+
+body[data-page="message"] .lb__actions .btn.btn--danger:hover {
+    background: #c62828;
+}
+
+body[data-page="message"] .lb__actions .btn.is-hidden {
+    display: none !important;
+}
+
+@keyframes lbIn {
+    from { opacity: 0; transform: scale(.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+    .lb__card { padding: 18px 16px; }
+    .lb__title { font-size: 15px; }
 }
