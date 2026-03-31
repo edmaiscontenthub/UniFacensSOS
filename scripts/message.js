@@ -1,24 +1,7 @@
-﻿/**
- * UniFacens SOS — message.js (novo fluxo do Lightbox)
- *
- * Correções deste ajuste:
- * 1) Volta a abrir WhatsApp automaticamente quando estiver pronto para enviar.
- *    - Ainda mantém o botão "Abrir WhatsApp" como fallback caso pop-up seja bloqueado.
- *
- * 2) Quando o GPS/localização estava OFF e o usuário liga depois:
- *    - Reinicia o watchPosition automaticamente (retry) para "pegar" a mudança sem refresh.
- *
- * Mantido:
- * - Textos iniciais ficam no HTML
- * - Botão "Enviar sem localização" aparece SEMPRE após 3s (independente do GPS)
- * - Spinner inicia parado e recebe classe "spinning" ao confirmar coords
- * - Best-only (não piora), meta 15m, +10m/2s, tentativa 10s
- */
-
-// ======================
+﻿// ======================
 // CONFIG
 // ======================
-const NUMERO_DESTINO_PADRAO = "5515991966412";
+const NUMERO_DESTINO_PADRAO = "5515991966412"; // Quando tipo não tem número ou é dia desabilitado, usa esse número genérico
 const DESTINO_CONFIG_POR_TIPO = {
   "PRIMEIROS SOCORROS": {
     numero: "5515981403334",
@@ -30,9 +13,9 @@ const DESTINO_CONFIG_POR_TIPO = {
   // },
 };
 
-const META_INICIAL_M = 5; // meta começa em 5m
+const META_INICIAL_M = 10; // meta começa em 10m
 const AUMENTO_META_M = 5; // meta aumenta 5m
-const AUMENTO_META_MS = 2000; // meta aumenta a cada 2s
+const AUMENTO_META_MS = 2500; // meta aumenta a cada 2,5s
 
 const ESPERA_COORDS_MS = 3000;     // botão "Enviar sem localização" após 3s
 const LIBERAR_MANUAL_MS = 3000;    // após confirmar coords, libera "Enviar sem precisão" após 3s
@@ -260,7 +243,7 @@ function abrirWhatsApp(url) {
 }
 
 /**
- * Atualiza UI para "Localização obtida!" e botão "Abrir WhatsApp"
+ * Atualiza UI para "Pronto!" e botão "Abrir WhatsApp"
  * e tenta abrir automaticamente.
  */
 function tentarEnviarParaWhatsApp(urlFinal) {
@@ -344,7 +327,7 @@ function iniciarTentativaAposConfirmacao() {
     showBtn();
   }, LIBERAR_MANUAL_MS);
 
-  // aumenta meta a cada 2s
+  // aumenta meta a cada 2,5s
   iAumentarMeta = setInterval(() => {
     if (enviouMensagem) return;
     metaPrecisao += AUMENTO_META_M;
