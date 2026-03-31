@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon-180.png">
-    <title>UniFacens SOS – Sistema Emergencial do Campus</title>
+    <title>UniFacens SOS - Sistema Emergencial do Campus</title>
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/utils.css">
     <link rel="stylesheet" href="../styles/message.css">
@@ -33,7 +33,7 @@
             <p>Selecione o tipo de ocorrência.</p>
 
             <div class="grid">
-                <a class="btn" id="fire" href="#" onclick="definirTipo('INCÊNDIO'); iniciarLocalizacao(); return false;">
+                <a class="btn" id="fire" href="#" data-emergency-type="INCÊNDIO">
                     <div class="btn-image">
                         <img id="normal" src="../assets/images/fire.svg" alt="">
                         <img id="hover" src="../assets/images/fire-hover.svg" alt="">
@@ -41,23 +41,23 @@
                     <span>Incêndio</span>
                 </a>
 
-                <a class="btn" id="first-aid" href="#" onclick="definirTipo('PRIMEIROS SOCORROS'); iniciarLocalizacao(); return false;">
+                <a class="btn" id="first-aid" href="#" data-emergency-type="PRIMEIROS SOCORROS">
                     <div class="btn-image">
                         <img id="normal" src="../assets/images/first-aid.svg" alt="">
                         <img id="hover" src="../assets/images/first-aid-hover.svg" alt="">
                     </div>
                     <span>Primeiros Socorros</span>
                 </a>
-        
-                <!-- <a class="btn" id="risk" href="#" onclick="definirTipo('RISCO'); iniciarLocalizacao(); return false;">
+
+                <!-- <a class="btn" id="risk" href="#" data-emergency-type="RISCO">
                     <div class="btn-image">
                         <img id="normal" src="../assets/images/risk.svg" alt="">
                         <img id="hover" src="../assets/images/risk-hover.svg" alt="">
                     </div>
                     <span>Risco</span>
                 </a> -->
-    
-                <!-- <a class="btn" id="other" href="#" onclick="definirTipo('OUTROS'); iniciarLocalizacao(); return false;">
+
+                <!-- <a class="btn" id="other" href="#" data-emergency-type="OUTROS">
                     <div class="btn-image">
                         <img id="normal" src="../assets/images/other.svg" alt="">
                         <img id="hover" src="../assets/images/other-hover.svg" alt="">
@@ -65,8 +65,8 @@
                     <span>Outros</span>
                 </a> -->
             </div>
-    
-            <p>Sistema de resposta rápida institucional</p>     
+
+            <p>Sistema de resposta rápida institucional</p>
         </main>
         <footer>
             <p>&lt;/ Developed by ED+ Content Hub &gt;</p>
@@ -74,20 +74,19 @@
         </footer>
     </div>
 
-    <!-- Overlay / Lightbox -->
     <div id="lightbox" class="lb is-hidden" aria-live="polite" aria-busy="false">
         <div class="lb__card" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
-
-            <!-- Cabeçalho (fixo no HTML) -->
             <div class="lb__header">
                 <div class="lb__spinner" aria-hidden="true"></div>
                 <div class="lb__titles">
                     <div id="lbTitle" class="lb__title">ATIVE A LOCALIZAÇÃO!</div>
                     <div id="lbSubtitle" class="lb__subtitle">Ative o GPS e permita o acesso, se solicitado.</div>
                 </div>
+                <button id="btnCloseLightbox" class="lb__close" type="button" aria-label="Fechar lightbox">
+                    ×
+                </button>
             </div>
 
-            <!-- Conteúdo (JS só preenche spans) -->
             <div class="lb__body">
                 <div class="lb__row">
                     <span class="lb__label">Precisão atual</span>
@@ -104,13 +103,11 @@
                 </div>
             </div>
 
-            <!-- Ações -->
             <div class="lb__actions">
                 <button id="btnForcar" class="btn btn--danger is-hidden" type="button">
                     Enviar sem localização
                 </button>
             </div>
-
         </div>
     </div>
 

@@ -112,7 +112,7 @@ body[data-page="message"] .lb .lb__card {
 
 body[data-page="message"] .lb .lb__header {
     display: grid;
-    grid-template-columns: 34px 1fr;
+    grid-template-columns: 34px 1fr auto;
     gap: 12px;
     align-items: center;
     margin-bottom: 14px;
@@ -142,6 +142,31 @@ body[data-page="message"] .lb .lb__header .lb__titles .lb__subtitle {
     font-size: 13px;
     color: #bbb;
     line-height: 1.35;
+}
+
+body[data-page="message"] .lb .lb__header .lb__close {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #bbb;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease, transform .12s ease;
+}
+
+body[data-page="message"] .lb .lb__header .lb__close:hover {
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+}
+
+body[data-page="message"] .lb .lb__header .lb__close:active {
+    transform: scale(.97);
 }
 
 body[data-page="message"] .lb .lb__body {
