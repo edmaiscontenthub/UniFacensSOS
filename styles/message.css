@@ -90,7 +90,7 @@ body[data-page="message"] .lb {
     justify-content: center;
     align-items: center;
     padding: 18px;
-    background: rgba(0, 0, 0, .94);
+    background: var(--overlay-dark-94);
     z-index: 9999;
 }
 
@@ -101,12 +101,12 @@ body[data-page="message"] .lb.is-hidden {
 body[data-page="message"] .lb .lb__card {
     width: 100%;
     max-width: 420px;
-    background: #111;
+    background: var(--surface-dark);
     background-color: var(--black);
-    border: 1px solid rgba(255, 255, 255, .06);
+    border: 1px solid var(--white-06);
     border-radius: 16px;
     padding: 20px 18px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, .6);
+    box-shadow: 0 0 40px var(--shadow-dark-60);
     animation: lbIn .22s ease;
 }
 
@@ -122,25 +122,25 @@ body[data-page="message"] .lb .lb__header .lb__spinner {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, .2);
+    border: 3px solid var(--white-20);
 }
 
 body[data-page="message"] .lb .lb__header .lb__spinner.spinning {
-    border-top-color: #fff;
+    border-top-color: var(--text-strong);
     animation: spin 1.05s linear infinite;
 }
 
 body[data-page="message"] .lb .lb__header .lb__titles .lb__title {
     font-weight: 700;
     font-size: 16px;
-    color: #fff;
+    color: var(--text-strong);
     line-height: 1.2;
 }
 
 body[data-page="message"] .lb .lb__header .lb__titles .lb__subtitle {
     margin-top: 2px;
     font-size: 13px;
-    color: #bbb;
+    color: var(--text-muted);
     line-height: 1.35;
 }
 
@@ -153,7 +153,7 @@ body[data-page="message"] .lb .lb__header .lb__close {
     border: none;
     border-radius: 999px;
     background: transparent;
-    color: #bbb;
+    color: var(--text-muted);
     font-size: 26px;
     line-height: 1;
     cursor: pointer;
@@ -161,8 +161,8 @@ body[data-page="message"] .lb .lb__header .lb__close {
 }
 
 body[data-page="message"] .lb .lb__header .lb__close:hover {
-    background: rgba(255, 255, 255, .06);
-    color: #fff;
+    background: var(--white-06);
+    color: var(--text-strong);
 }
 
 body[data-page="message"] .lb .lb__header .lb__close:active {
@@ -178,7 +178,7 @@ body[data-page="message"] .lb__row {
     align-items: center;
     justify-content: space-between;
     padding: 10px 0;
-    border-block: 1px solid rgba(255, 255, 255, .06);
+    border-block: 1px solid var(--white-06);
 }
 
 body[data-page="message"] .lb__row.lb__row:first-of-type {
@@ -186,12 +186,12 @@ body[data-page="message"] .lb__row.lb__row:first-of-type {
 }
 
 body[data-page="message"] .lb__row .lb__label {
-    color: #bbb;
+    color: var(--text-muted);
     font-size: 13px;
 }
 
 body[data-page="message"] .lb__row .lb__value {
-    color: #fff;
+    color: var(--text-strong);
     font-weight: 700;
     font-size: 14px;
 }
@@ -199,7 +199,7 @@ body[data-page="message"] .lb__row .lb__value {
 body[data-page="message"] .lb__hint {
     margin-top: 10px;
     font-size: 12px;
-    color: rgba(255, 255, 255, .75);
+    color: var(--white-75);
 }
 
 body[data-page="message"] .lb__actions {
@@ -221,12 +221,12 @@ body[data-page="message"] .lb__actions .btn:active {
 }
 
 body[data-page="message"] .lb__actions .btn.btn--danger {
-    background: #e53935;
-    color: #fff;
+    background: var(--red);
+    color: var(--text-strong);
 }
 
 body[data-page="message"] .lb__actions .btn.btn--danger:hover {
-    background: #c62828;
+    background: var(--red-dark);
 }
 
 body[data-page="message"] .lb__actions .btn.is-hidden {

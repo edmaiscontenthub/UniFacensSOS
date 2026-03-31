@@ -9,8 +9,25 @@ font-family: "Reddit Sans Condensed", Arial, sans-serif;
   --black: #3c3c3b;
   --white: #ffffff;
   --red: #e23333;
+  --red-dark: #c62828;
   --pink: #ffc5c5;
   --gray: #9d9d9c;
+
+  --surface-dark: #111111;
+  --black-pure: #000000;
+  --overlay-dark-94: rgba(0, 0, 0, .94);
+  --shadow-dark-60: rgba(0, 0, 0, .6);
+  --black-100: rgba(0, 0, 0, 1);
+  --black-50: rgba(0, 0, 0, .5);
+  --black-25: rgba(0, 0, 0, .25);
+
+  --white-06: rgba(255, 255, 255, .06);
+  --white-20: rgba(255, 255, 255, .2);
+  --white-75: rgba(255, 255, 255, .75);
+
+  --text-strong: var(--white);
+  --text-soft: #cccccc;
+  --text-muted: #bbbbbb;
 }
 
 html,

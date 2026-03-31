@@ -1,18 +1,18 @@
 body[data-page="map"] {
     height: 100vh;
     height: 100dvh;
-    background: #000;
+    background: var(--black-pure);
 }
 
 body[data-page="map"] #loader {
     position: fixed;
     inset: 0;
-    background: #000;
+    background: var(--black-pure);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: white;
+    color: var(--text-strong);
     z-index: 10;
 }
 
@@ -28,9 +28,9 @@ body[data-page="map"] #loader .icon-wrapper .risk-ring {
     inset: 0;
     border-radius: 50%;
     border: 5px solid transparent;
-    border-top: 5px solid #fff;
-    border-right: 5px solid #fff;
-    border-bottom: 5px solid #fff;
+    border-top: 5px solid var(--text-strong);
+    border-right: 5px solid var(--text-strong);
+    border-bottom: 5px solid var(--text-strong);
     animation: spin 1.3s linear infinite;
 }
 
@@ -40,11 +40,11 @@ body[data-page="map"] #loader .icon-wrapper .location-icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #e53935;
+    color: var(--red);
 }
 
 body[data-page="map"] #loader p {
-    color: #ccc;
+    color: var(--text-soft);
     text-align: center;
 }
 

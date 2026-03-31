@@ -37,7 +37,7 @@ body[data-page="home"] .lb {
     justify-content: center;
     align-items: center;
     padding: 18px;
-    background: rgba(0, 0, 0, .94);
+    background: var(--overlay-dark-94);
     z-index: 9999;
 }
 
@@ -49,10 +49,10 @@ body[data-page="home"] .lb .lb__card {
     width: 100%;
     max-width: 420px;
     background-color: var(--black);
-    border: 1px solid rgba(255, 255, 255, .06);
+    border: 1px solid var(--white-06);
     border-radius: 16px;
     padding: 20px 18px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, .6);
+    box-shadow: 0 0 40px var(--shadow-dark-60);
     animation: lbIn .22s ease;
 }
 
@@ -63,14 +63,14 @@ body[data-page="home"] .lb .lb__header {
 body[data-page="home"] .lb .lb__title {
     font-weight: 700;
     font-size: 16px;
-    color: #fff;
+    color: var(--text-strong);
     line-height: 1.2;
 }
 
 body[data-page="home"] .lb .lb__subtitle {
     margin-top: 8px;
     font-size: 13px;
-    color: #bbb;
+    color: var(--text-muted);
     line-height: 1.35;
 }
 
@@ -93,12 +93,12 @@ body[data-page="home"] .lb .lb__actions .btn:active {
 }
 
 body[data-page="home"] .lb .lb__actions .btn.btn--danger {
-    background: #e53935;
-    color: #fff;
+    background: var(--red);
+    color: var(--text-strong);
 }
 
 body[data-page="home"] .lb .lb__actions .btn.btn--danger:hover {
-    background: #c62828;
+    background: var(--red-dark);
 }
 
 @keyframes lbIn {

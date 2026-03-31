@@ -27,7 +27,7 @@ body .container header {
 body .container header .back img {
     display: block;
     width: 1.5rem;
-    filter: drop-shadow(0 0 .5rem rgba(0, 0, 0, 1));
+    filter: drop-shadow(0 0 .5rem var(--black-100));
 }
 
 body .container header .logo {
@@ -37,7 +37,7 @@ body .container header .logo {
 
 body .container header .logo img {
     height: 1.5rem;
-    filter: drop-shadow(0 0 .5rem rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 0 .5rem var(--black-50));
 }
 
 body .container header .title {
@@ -52,13 +52,13 @@ body .container header .title {
 body .container header .title img {
     width: 2.75rem;
     height: 2.75rem;
-    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 0 1rem var(--black-25));
 }
 
 body .container header .title h1 {
     font-size: 2.75em;
     color: var(--white);
-    text-shadow: 0 0 1rem rgba(0, 0, 0, 0.25);
+    text-shadow: 0 0 1rem var(--black-25);
 }
 
 body .container main {
@@ -72,7 +72,7 @@ body .container main {
 body .container main p {
     color: var(--white);
     font-size: 1rem;
-    text-shadow: 0 0 .5rem rgba(0, 0, 0, 1);
+    text-shadow: 0 0 .5rem var(--black-100);
 }
 
 body .container main .btn {
@@ -88,10 +88,10 @@ body .container main .btn {
     border-radius: 10px;
     text-decoration: none;
     font-weight: bold;
-    color: white;
+    color: var(--text-strong);
     background: var(--pink);
     min-height: 7rem;
-    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 1rem var(--black-25);
     transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
 }
 
@@ -109,13 +109,13 @@ body .container main .btn .btn-image img {
 
 body .container main .btn span {
     color: var(--black);
-    font-size: 1.2em;
+    font-size: 1.2rem;
     transition: color .2s ease;
 }
 
 body .container main .btn:hover {
     background: var(--red);
-    box-shadow: 0 0 .5rem rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 .5rem var(--black-25);
 }
 
 body .container main .btn:hover span {
@@ -129,7 +129,7 @@ body .container main .btn.is-hidden {
 body .container main p:last-child {
     font-size: .75rem;
     color: var(--gray);
-    text-shadow: 0 0 .5rem rgba(0, 0, 0, 1);
+    text-shadow: 0 0 .5rem var(--black-100);
 }
 
 body .container footer {
@@ -141,7 +141,7 @@ body .container footer {
 body .container footer p {
     font-size: .6rem;
     color: var(--gray);
-    text-shadow: 0 0 .5rem rgba(0, 0, 0, 1);
+    text-shadow: 0 0 .5rem var(--black-100);
     text-align: center;
 }
 
