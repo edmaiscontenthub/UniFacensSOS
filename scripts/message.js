@@ -1,18 +1,24 @@
-﻿// ======================
+﻿import { estaDisponivelAgora } from "./availability.js";
+
+// ======================
 // CONFIG
 // ======================
+// Dias: 1=domingo, 2=segunda, ..., 7=sábado.
+// Horários são avaliados no fuso America/Sao_Paulo e incluem início e fim.
 const NUMERO_DESTINO_PADRAO = "5515991966412";
 const TIPO_PADRAO_EMERGENCIA = "EMERGÊNCIA";
 
 const DESTINO_CONFIG_POR_TIPO = {
+  "INCÊNDIO": {
+    numero: "5515991966412",
+    diasHabilitados: [1, 2, 3, 4, 5, 6, 7],
+    horarioHabilitado: { inicio: "00:00", fim: "23:59" },
+  },
   "PRIMEIROS SOCORROS": {
     numero: "5515981403334",
-    diasDesabilitados: [1, 7], // 1=domingo, 7=sabado
+    diasHabilitados: [2, 3, 4, 5, 6], 
+    horarioHabilitado: { inicio: "08:00", fim: "17:30" },
   },
-  // "INCÊNDIO": {
-  //   numero: "5515991966412",
-  //   diasDesabilitados: [],
-  // },
 };
 
 const META_INICIAL_M = 10;
@@ -107,6 +113,11 @@ function normalizarTipo(tipo) {
     .toUpperCase();
 }
 
+function obterNumeroValido(numero) {
+  const somenteDigitos = String(numero || "").replace(/\D/g, "");
+  return /^\d{10,15}$/.test(somenteDigitos) ? somenteDigitos : null;
+}
+
 const DESTINO_CONFIG_NORMALIZADO_POR_TIPO = Object.fromEntries(
   Object.entries(DESTINO_CONFIG_POR_TIPO).map(([tipo, config]) => [
     normalizarTipo(tipo),
@@ -114,41 +125,18 @@ const DESTINO_CONFIG_NORMALIZADO_POR_TIPO = Object.fromEntries(
   ])
 );
 
-function getWeekdaySaoPaulo(date = new Date()) {
-  const weekdayName = new Intl.DateTimeFormat("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    weekday: "long",
-  }).format(date);
-
-  const weekdayNormalized = String(weekdayName || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
-  const map = {
-    "domingo": 1,
-    "segunda-feira": 2,
-    "terca-feira": 3,
-    "quarta-feira": 4,
-    "quinta-feira": 5,
-    "sexta-feira": 6,
-    "sabado": 7,
-  };
-
-  return map[weekdayNormalized];
-}
-
 function obterNumeroDestinoPorTipo(tipo) {
+  const numeroPadrao = obterNumeroValido(NUMERO_DESTINO_PADRAO) || "";
   const tipoNormalizado = normalizarTipo(tipo);
   const config = DESTINO_CONFIG_NORMALIZADO_POR_TIPO[tipoNormalizado];
-  if (!config?.numero) return NUMERO_DESTINO_PADRAO;
+  const numeroConfigurado = obterNumeroValido(config?.numero);
+  if (!numeroConfigurado) return numeroPadrao;
 
-  const diaAtual = getWeekdaySaoPaulo();
-  if (config.diasDesabilitados?.includes(diaAtual)) {
-    return NUMERO_DESTINO_PADRAO;
+  if (!estaDisponivelAgora(config)) {
+    return numeroPadrao;
   }
 
-  return config.numero;
+  return numeroConfigurado;
 }
 
 // ======================

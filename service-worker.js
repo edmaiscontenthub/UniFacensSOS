@@ -1,4 +1,4 @@
-const CACHE_VERSION = "unifacens-sos-v4"; // Atualize este valor para forcar atualizacao do cache.
+const CACHE_VERSION = "unifacens-sos-v5"; // Atualize este valor para forcar atualizacao do cache.
 const CACHE_PREFIX = "unifacens-sos-";
 const CACHE_NAME = CACHE_VERSION;
 
@@ -33,6 +33,7 @@ const APP_SHELL_PATHS = [
   "scripts/message.js",
   "scripts/map.js",
   "scripts/utils.js",
+  "scripts/availability.js",
 
   "assets/images/unifacens-logo.svg",
   "assets/images/sos.svg",
