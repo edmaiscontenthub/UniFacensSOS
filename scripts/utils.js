@@ -2,7 +2,6 @@ let serviceWorkerRegistrationStarted = false;
 let autoReloadRegistered = false;
 
 const UPDATE_RELOAD_DONE_KEY = "unifacens-sos:sw-reload-done-session";
-const CONNECTIVITY_PROBE_URL = "https://connectivitycheck.gstatic.com/generate_204";
 
 function safeGet(storage, key) {
   try {
@@ -28,26 +27,6 @@ function markReloadDoneInSession() {
   safeSet(sessionStorage, UPDATE_RELOAD_DONE_KEY, "1");
 }
 
-async function canReachInternet() {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2500);
-  const probeUrl = `${CONNECTIVITY_PROBE_URL}?ts=${Date.now()}`;
-
-  try {
-    await fetch(probeUrl, {
-      method: "GET",
-      mode: "no-cors",
-      cache: "no-store",
-      signal: controller.signal
-    });
-    return true;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
 function registerAutoReloadOnControllerChange() {
   if (autoReloadRegistered) return;
   autoReloadRegistered = true;
@@ -68,14 +47,12 @@ function registerAutoReloadOnControllerChange() {
 
 function scheduleUpdateCheck(registration) {
   const run = async () => {
-    const online = await canReachInternet();
-    if (!online) return;
-
     try {
       await registration.update();
       console.info("[UniFacens SOS] Verificacao de atualizacao do app concluida.");
     } catch (error) {
-      console.warn("[UniFacens SOS] Falha na verificacao de atualizacao:", error);
+      // Offline ou falha temporaria: o Service Worker atual e seu cache continuam ativos.
+      console.info("[UniFacens SOS] Atualizacao indisponivel; usando a versao em cache.", error);
     }
   };
 

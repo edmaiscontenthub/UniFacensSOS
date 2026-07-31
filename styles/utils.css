@@ -56,7 +56,7 @@ body .container header .title img {
 }
 
 body .container header .title h1 {
-    font-size: 2.75em;
+    font-size: 2.5rem;
     color: var(--white);
     text-shadow: 0 0 1rem var(--black-25);
 }
@@ -144,6 +144,33 @@ body .container footer p {
     text-shadow: 0 0 .5rem var(--black-100);
     text-align: center;
 }
+
+@media (width < 380px) {
+    body .container header .title h1 {
+        font-size: 2.25rem;
+    }
+    body .container main .btn {
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (width < 320px) {
+    body .container header .title h1 {
+        font-size: 2rem;
+    }
+    body .container main .btn {
+        padding: 1rem 1.25rem;
+    }
+}
+
+/* @media (width < 314px) {
+    body .container header .title h1 {
+        font-size: 1.75rem;
+    }
+    body .container main .btn {
+        padding: 1rem 1rem;
+    }
+} */
 
 @keyframes spin {
     to { transform: rotate(360deg); }

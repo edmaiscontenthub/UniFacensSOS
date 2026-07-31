@@ -7,6 +7,7 @@
 // Horários são avaliados no fuso America/Sao_Paulo e incluem início e fim.
 const NUMERO_DESTINO_PADRAO = "5515991966412";
 const TIPO_PADRAO_EMERGENCIA = "EMERGÊNCIA";
+const ABRIR_WHATSAPP_AUTOMATICAMENTE = false;
 
 const DESTINO_CONFIG_POR_TIPO = {
   "INCÊNDIO": {
@@ -401,13 +402,19 @@ function aplicarSeMelhor(lat, lon, acc) {
   return false;
 }
 
-function prepareReadyToSend(urlFinal) {
+function prepareReadyToSend(
+  urlFinal,
+  abrirAutomaticamente = ABRIR_WHATSAPP_AUTOMATICAMENTE
+) {
   stopGeolocationWatch();
   clearScheduledWork();
 
   runtime.pendingWhatsAppUrl = urlFinal;
   setFlowState(FLOW_STATE.READY_TO_SEND);
-  abrirWhatsApp(urlFinal);
+
+  if (abrirAutomaticamente) {
+    abrirWhatsApp(urlFinal);
+  }
 }
 
 function iniciarTentativaAposConfirmacao() {
@@ -558,12 +565,16 @@ function onTypeButtonClick(event) {
 
 function onPrimaryActionClick() {
   if (runtime.currentState === FLOW_STATE.REQUESTING_LOCATION) {
-    prepareReadyToSend(montarUrlSemLocalizacao());
+    const url = montarUrlSemLocalizacao();
+    prepareReadyToSend(url, false);
+    abrirWhatsApp(url);
     return;
   }
 
   if (runtime.currentState === FLOW_STATE.IMPROVING_LOCATION) {
-    prepareReadyToSend(montarUrlComMelhorLeituraOuFallback());
+    const url = montarUrlComMelhorLeituraOuFallback();
+    prepareReadyToSend(url, false);
+    abrirWhatsApp(url);
     return;
   }
 
