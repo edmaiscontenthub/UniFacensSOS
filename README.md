@@ -35,11 +35,11 @@ O app foi projetado para funcionar de forma leve, sem necessidade de backend.
 
 ### 📞 Canal de Ligações
 
-Na página `call.html`, o usuário pode realizar ligações diretas para setores específicos da instituição.
+Na rota `/call/`, o usuário pode realizar ligações diretas para setores específicos da instituição.
 
 ### 💬 Canal de Mensagem com Localização
 
-Na página `message.html`, o usuário seleciona a categoria de emergência e o sistema:
+Na rota `/message/`, o usuário seleciona a categoria de emergência e o sistema:
 
 1. Solicita permissão de localização
 2. Tenta obter coordenadas válidas
@@ -49,7 +49,7 @@ Na página `message.html`, o usuário seleciona a categoria de emergência e o s
 
 ### 🗺️ Visualização de Mapa
 
-A página `map.html` recebe latitude e longitude via query string e renderiza o mapa em visão de satélite com o Google Maps incorporado.
+A rota `/map/` recebe latitude e longitude via query string e renderiza o mapa em visão de satélite com o Google Maps incorporado.
 
 ---
 
@@ -94,12 +94,9 @@ unifacens-sos/
 ├── manifest.json        # Manifesto PWA (instalação do app)
 ├── service-worker.js    # Service Worker (offline e atualizações)
 │
-├── pages/               # Páginas funcionais do app
-│   │
-│   ├── home.html        # Tela inicial
-│   ├── call.html        # Canal de ligações por setor
-│   ├── message.html     # Envio de mensagem com localização
-│   └── map.html         # Visualização da localização no mapa
+├── call/index.html      # Canal de ligações por setor
+├── message/index.html   # Envio de mensagem com localização
+├── map/index.html       # Visualização da localização no mapa
 │
 ├── styles/              # Arquivos de estilo
 │   │

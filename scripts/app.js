@@ -3,20 +3,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const utils = await import('./utils.js')
   if (utils.initGlobal) utils.initGlobal()
 
-  const page = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  const page = utils.getCurrentAppRoute ? utils.getCurrentAppRoute() : 'home';
 
   const routes = {
-    'home.html': () => import('./home.js'),
-    'call.html': () => import('./call.js'),
-    'message.html': () => import('./message.js'),
-    'map.html': () => import('./map.js'),
+    home: () => import('./home.js'),
+    call: () => import('./call.js'),
+    message: () => import('./message.js'),
+    map: () => import('./map.js'),
   };
 
-  const loader = routes[page];
-  if (!loader) {
-    console.info('[UniFacens SOS] Nenhum módulo mapeado para:', page);
-    return;
-  }
+  const loader = routes[page] || routes.home;
 
   try {
     const module = await loader();

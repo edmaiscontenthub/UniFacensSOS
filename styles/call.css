@@ -12,35 +12,35 @@ body[data-page="call"] .container main .grid .btn {
     min-height: 11rem;
 }
 
-body[data-page="call"] .container main .grid .btn#gatehouse img#normal {
+body[data-page="call"] .container main .grid .btn#security-gate img#normal {
     opacity: 1;
 }
 
-body[data-page="call"] .container main .grid .btn#gatehouse img#hover {
+body[data-page="call"] .container main .grid .btn#security-gate img#hover {
     opacity: 0;
 }
 
-body[data-page="call"] .container main .grid .btn#gatehouse:hover img#normal {
+body[data-page="call"] .container main .grid .btn#security-gate:hover img#normal {
     opacity: 0;
 }
 
-body[data-page="call"] .container main .grid .btn#gatehouse:hover img#hover {
+body[data-page="call"] .container main .grid .btn#security-gate:hover img#hover {
     opacity: 1;
 }
 
-body[data-page="call"] .container main .grid .btn#clinic img#normal {
+body[data-page="call"] .container main .grid .btn#occupational-medicine img#normal {
     opacity: 1;
 }
 
-body[data-page="call"] .container main .grid .btn#clinic img#hover {
+body[data-page="call"] .container main .grid .btn#occupational-medicine img#hover {
     opacity: 0;
 }
 
-body[data-page="call"] .container main .grid .btn#clinic:hover img#normal {
+body[data-page="call"] .container main .grid .btn#occupational-medicine:hover img#normal {
     opacity: 0;
 }
 
-body[data-page="call"] .container main .grid .btn#clinic:hover img#hover {
+body[data-page="call"] .container main .grid .btn#occupational-medicine:hover img#hover {
     opacity: 1;
 }
 

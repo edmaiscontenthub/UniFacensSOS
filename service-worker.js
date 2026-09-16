@@ -1,4 +1,4 @@
-const CACHE_VERSION = "unifacens-sos-v6"; // Atualize este valor para forcar atualizacao do cache.
+const CACHE_VERSION = "unifacens-sos-v7"; // Atualize este valor para forcar atualizacao do cache.
 const CACHE_PREFIX = "unifacens-sos-";
 const CACHE_NAME = CACHE_VERSION;
 
@@ -15,10 +15,9 @@ const APP_SHELL_PATHS = [
   "index.html",
   "manifest.json",
 
-  "pages/home.html",
-  "pages/call.html",
-  "pages/message.html",
-  "pages/map.html",
+  "call/index.html",
+  "message/index.html",
+  "map/index.html",
 
   "styles/global.css",
   "styles/utils.css",
@@ -42,10 +41,10 @@ const APP_SHELL_PATHS = [
   "assets/images/message.svg",
   "assets/images/message-hover.svg",
   "assets/images/return.svg",
-  "assets/images/gatehouse.svg",
-  "assets/images/gatehouse-hover.svg",
-  "assets/images/clinic.svg",
-  "assets/images/clinic-hover.svg",
+  "assets/images/security-gate.svg",
+  "assets/images/security-gate-hover.svg",
+  "assets/images/occupational-medicine.svg",
+  "assets/images/occupational-medicine-hover.svg",
   "assets/images/occupational-safety.svg",
   "assets/images/occupational-safety-hover.svg",
   "assets/images/fire.svg",
@@ -56,14 +55,13 @@ const APP_SHELL_PATHS = [
   "assets/images/risk-hover.svg",
   "assets/images/other.svg",
   "assets/images/other-hover.svg",
-  "assets/images/edmais-logo.svg",
 
   "assets/icons/icon.svg",
   "assets/icons/apple-touch-icon-180.png"
 ];
 
 const APP_SHELL_URLS = APP_SHELL_PATHS.map(toScopedUrl);
-const HOME_FALLBACK_URL = toScopedUrl("pages/home.html");
+const HOME_FALLBACK_URL = toScopedUrl("index.html");
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

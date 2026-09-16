@@ -2,6 +2,29 @@ let serviceWorkerRegistrationStarted = false;
 let autoReloadRegistered = false;
 
 const UPDATE_RELOAD_DONE_KEY = "unifacens-sos:sw-reload-done-session";
+const APP_ROUTE_NAMES = new Set(["home", "call", "message", "map"]);
+
+function isAppRoute(route) {
+  return APP_ROUTE_NAMES.has(route);
+}
+
+export function getCurrentAppRoute(pathname = window.location.pathname) {
+  const segments = pathname.split("/").filter(Boolean);
+  const lastSegment = segments[segments.length - 1] || "";
+  const route = lastSegment === "index.html"
+    ? segments[segments.length - 2] || "home"
+    : lastSegment;
+
+  return isAppRoute(route.toLowerCase()) ? route.toLowerCase() : "home";
+}
+
+export function getAppRouteUrl(route) {
+  const safeRoute = isAppRoute(route) ? route : "home";
+  const appRootUrl = new URL("../", import.meta.url);
+
+  if (safeRoute === "home") return appRootUrl;
+  return new URL(`${safeRoute}/`, appRootUrl);
+}
 
 function safeGet(storage, key) {
   try {

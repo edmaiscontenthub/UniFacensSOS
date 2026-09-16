@@ -1,4 +1,5 @@
 ﻿import { estaDisponivelAgora } from "./availability.js";
+import { getAppRouteUrl } from "./utils.js";
 
 // ======================
 // CONFIG
@@ -26,8 +27,8 @@ const META_INICIAL_M = 10;
 const AUMENTO_META_M = 5;
 const AUMENTO_META_MS = 2500;
 
-const ESPERA_COORDS_MS = 3000;
-const LIBERAR_MANUAL_MS = 3000;
+const ESPERA_COORDS_MS = 5000;
+const LIBERAR_MANUAL_MS = 5000;
 const TENTATIVA_MAX_MS = 10000;
 const TICK_MELHORIA_MS = 500;
 const RETRY_WATCH_MS = 2000;
@@ -155,15 +156,8 @@ function coordenadasValidas(lat, lon) {
   return true;
 }
 
-function obterRootDoSite() {
-  const { origin, pathname } = window.location;
-  const antesDePages = pathname.split("/pages/")[0];
-  return origin + antesDePages;
-}
-
 function gerarLinkMapa(lat, lon) {
-  const root = obterRootDoSite();
-  const url = new URL(root + "/pages/map.html");
+  const url = getAppRouteUrl("map");
   url.searchParams.set("lat", lat);
   url.searchParams.set("lon", lon);
   return url.toString();

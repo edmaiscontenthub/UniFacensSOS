@@ -1,7 +1,7 @@
 {
   "name": "UniFacens SOS",
   "short_name": "UniFacens SOS",
-  "start_url": "./pages/home.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#000000",

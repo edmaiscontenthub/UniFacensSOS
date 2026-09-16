@@ -11,7 +11,7 @@ const CONTATOS_CONFIG_POR_SETOR = {
     diasHabilitados: [1, 2, 3, 4, 5, 6, 7],
     horarioHabilitado: { inicio: "00:00", fim: "23:59" },
   },
-  "AMBULATÓRIO": {
+  "MEDICINA DO TRABALHO": {
     numero: "5515981403334",
     diasHabilitados: [2, 3, 4, 5, 6],
     horarioHabilitado: { inicio: "08:00", fim: "17:30" },

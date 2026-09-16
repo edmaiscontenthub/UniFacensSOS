@@ -163,15 +163,6 @@ body .container footer p {
     }
 }
 
-/* @media (width < 314px) {
-    body .container header .title h1 {
-        font-size: 1.75rem;
-    }
-    body .container main .btn {
-        padding: 1rem 1rem;
-    }
-} */
-
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
