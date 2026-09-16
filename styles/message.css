@@ -1,4 +1,4 @@
-body[data-page="message"] .container main p:first-child {
+body[data-page="message"] .container main p.highlight {
     margin-inline: auto;
     border-top: 1px solid var(--red);
     border-bottom: 1px solid var(--red);

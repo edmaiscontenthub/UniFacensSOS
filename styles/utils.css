@@ -75,6 +75,12 @@ body .container main p {
     text-shadow: 0 0 .5rem var(--black-100);
 }
 
+body .container main p:first-child {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 .5rem var(--black-75);
+}
+
 body .container main .btn {
     display: grid;
     grid-template-columns: 1fr 1fr;
